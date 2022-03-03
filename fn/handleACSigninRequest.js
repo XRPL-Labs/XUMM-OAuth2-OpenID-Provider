@@ -1,0 +1,85 @@
+const config = require('../config')
+
+const appendQuery = require('append-query')
+const datastore = require('../datastore')
+const fernet = require('fernet')
+
+const {CODE_LIFE_SPAN} = config.jwt
+const fernetToken = new fernet.Token({ secret: new fernet.Secret(config.secret) })
+
+module.exports = function handleACSigninRequest (req, res) {
+  console.log('handleACSigninRequest')
+
+  if (req.body.username === undefined || req.body.password === undefined || req.body.client_id === undefined || req.body.redirect_uri === undefined) {
+    return res.status(400).send(JSON.stringify({
+      error: 'invalid_request',
+      error_description: 'Required parameters are missing in the request.'
+    }))
+  }
+
+  const userQuery = datastore
+    .createQuery('user')
+    .filter('username', '=', req.body.username)
+    .filter('password', '=', req.body.password)
+
+  const clientQuery = datastore
+    .createQuery('client')
+    .filter('client-id', '=', req.body.client_id)
+    .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
+    .filter('ac-enabled', '=', true)
+
+  datastore
+    .runQuery(userQuery)
+    .then(result => {
+      if (result[0].length === 0) {
+        return Promise.reject(new Error('Invalid user credentials.'))
+      }
+    })
+    .then(() => {
+      return datastore.runQuery(clientQuery)
+    })
+    .then(result => {
+      if (result[0].length === 0) {
+        return Promise.reject(new Error('Invalid client and/or redirect URL.'))
+      }
+    })
+    .then(() => {
+      const authorizationCode = fernetToken
+        .encode(JSON.stringify({
+          'client_id': req.body.client_id,
+          'redirect_url': req.body.redirect_uri
+        }))
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+
+      const exp = Date.now() + CODE_LIFE_SPAN;
+
+      const key = datastore.key(['authorization_code', authorizationCode])
+      const data = {
+        'client_id': req.body.client_id,
+        'redirect_url': req.body.redirect_uri,
+        'exp': exp,
+        'state': req.body?.state || undefined,
+        'nonce': req.body?.nonce || undefined,
+        'scope': req.body?.scope || undefined,
+      };
+
+      return Promise.all([
+        datastore.upsert({ key: key, data: data }),
+        Promise.resolve(authorizationCode)
+      ])
+    })
+    .then(results => {
+      res.redirect(appendQuery(req.body.redirect_uri, {
+        authorization_code: results[1],
+        state: req.body?.state || undefined,
+        nonce: req.body?.nonce || undefined,
+      }))
+    })
+    .catch (e => {
+      console.log('error', e.message)
+      return res.status(400).send('Nope, error: ' + e.message)
+    })
+}

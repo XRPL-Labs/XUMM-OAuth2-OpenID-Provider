@@ -1,0 +1,24 @@
+{
+  "name": "xumm-oauth2-server",
+  "version": "0.0.1",
+  "private": false,
+  "license": "MIT",
+  "author": "Wietse Wind <hi@wietse.com>",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": "16.x.x"
+  },
+  "scripts": {},
+  "dependencies": {
+    "append-query": "^2.0.1",
+    "body-parser": "^1.19.1",
+    "express": "^4.16.3",
+    "fernet": "^0.3.1",
+    "jsonwebtoken": "^8.2.1",
+    "mysql2": "^2.3.3",
+    "pug": "^3.0.2"
+  }
+}
