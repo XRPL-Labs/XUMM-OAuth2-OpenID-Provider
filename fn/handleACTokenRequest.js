@@ -3,7 +3,6 @@ const config = require('../config')
 const verifyAuthorizationCode = require('./verifyAuthorizationCode')
 
 const datastore = require('../datastore')
-const fs = require('fs')
 const jwt = require('jsonwebtoken')
 
 const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
@@ -11,7 +10,7 @@ const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 module.exports = function handleACTokenRequest (req, res) {
     console.log('handleACTokenRequest')
   
-    if ((req.body.client_id === undefined && !login) || req.body.client_secret === undefined || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined) {
+    if (req.body.client_id === undefined || req.body.client_secret === undefined || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined) {
       return res.status(400).json(({
         error: 'invalid_request',
         error_description: 'Required parameters are missing in the request.'
