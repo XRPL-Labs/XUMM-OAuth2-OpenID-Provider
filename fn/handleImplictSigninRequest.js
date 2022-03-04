@@ -62,7 +62,8 @@ module.exports = function handleImplictSigninRequest (req, res) {
       })
       res.redirect(appendQuery(req.body.redirect_uri, {
         access_token: token,
-        token_type: 'JWT',
+        refresh_token: '',
+        token_type: 'bearer',
         expires_in: JWT_LIFE_SPAN,
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,

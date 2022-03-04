@@ -34,8 +34,10 @@ module.exports = function handleACPKCETokenRequest (req, res) {
       })
       res.status(200).json(({
         access_token: token,
-        token_type: 'JWT',
-        expires_in: JWT_LIFE_SPAN
+        refresh_token: '',
+        token_type: 'bearer',
+        expires_in: JWT_LIFE_SPAN,
+        scope: entry?.scope || undefined,
       }))
     })
     .catch(error => {
