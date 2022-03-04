@@ -17,7 +17,22 @@ module.exports = function handleACPKCETokenRequest (req, res) {
     }))
   }
 
-  verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
+  const clientQuery = datastore
+    .createQuery('client')
+    .filter('client-id', '=', req.body.client_id)
+    .filter('client-secret', '=', req.body.client_secret)
+    .filter('acpkce-enabled', '=', true)
+
+  datastore
+    .runQuery(clientQuery)
+    .then(clientQueryResult => {
+      if (clientQueryResult[0].length === 0) {
+        return Promise.reject(new Error('Invalid client credentials.'))
+      }
+    })
+    .then(() => {
+      return verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
+    })
     .then(entry => {
       console.log('handleACPKCETokenRequest', {entry})
       const token = jwt.sign({
@@ -41,7 +56,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
       }))
     })
     .catch(error => {
-      if (error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.' || error.message === 'Code verifier does not match code challenge.') {
+      if (error.message === 'Invalid client credentials.' || error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.' || error.message === 'Code verifier does not match code challenge.') {
         res.status(400).json(({
           error: 'access_denied',
           error_description: error.message
