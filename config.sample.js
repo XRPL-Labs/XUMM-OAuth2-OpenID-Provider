@@ -11,5 +11,13 @@ module.exports = {
     JWT_LIFE_SPAN: 1800 * 1000,
     CODE_LIFE_SPAN: 600 * 1000,
     PRIVATE_KEY: fs.readFileSync('private.pem', 'utf8')
+  },
+  xumm: {
+    apikey: 'xxx',
+    apisecret: 'xxx',
+  },
+  openid: {
+    discovery: {},
+    certs: [], // Pub PEM with node pem-jwk
   }
 }
