@@ -1,6 +1,5 @@
 const datastore = require('../datastore')
-const path = require('path')
-const pug = require('pug')
+const renderSignInUi = require('./renderSignInUi')
 
 module.exports = function handleImplicitAuthRequest (req, res) {
   console.log('handleImplicitAuthRequest')
@@ -26,16 +25,7 @@ module.exports = function handleImplicitAuthRequest (req, res) {
       }
     })
     .then(() => {
-      const html = pug.renderFile(path.join(__dirname, '..', 'auth.pug'), {
-        response_type: 'token', // implicit
-        client_id: req.query.client_id,
-        redirect_url: req.query.redirect_uri,
-        code_challenge: req.query.code_challenge,
-        state: req.query?.state,
-        nonce: req.query?.nonce,
-        scope: req.query?.scope,
-      })
-      res.status(200).send(html)
+      renderSignInUi(req, res, {response_type: 'token'})
     })
     .catch(error => {
       if (error.message === 'Invalid client/redirect URL.') {

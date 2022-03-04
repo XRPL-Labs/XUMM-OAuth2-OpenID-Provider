@@ -28,11 +28,15 @@ module.exports = function handleImplictSigninRequest (req, res) {
     .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
     .filter('implicit-enabled', '=', true)
 
+  let sub = null // username
+
   datastore
     .runQuery(userQuery)
     .then(result => {
       if (result[0].length === 0) {
         return Promise.reject(new Error('Invalid user credentials.'))
+      } else {
+        sub = result[0][0].username
       }
     })
     .then(() => {
@@ -49,6 +53,8 @@ module.exports = function handleImplictSigninRequest (req, res) {
         state: req.body?.state || undefined,
         scope: req.body?.scope || undefined,
         nonce: req.body?.nonce || undefined,
+        aud: req.body.client_id,
+        sub
       }, PRIVATE_KEY, {
         algorithm: 'RS256',
         expiresIn: JWT_LIFE_SPAN,

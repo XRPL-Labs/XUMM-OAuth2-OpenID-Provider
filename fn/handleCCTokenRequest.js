@@ -36,6 +36,8 @@ module.exports = function handleCCTokenRequest (req, res) {
           state: req.body?.state || undefined,
           scope: req.body?.scope || undefined,  
           nonce: req.body?.nonce || undefined,
+          aud: req.body.client_id,
+          sub: null, // TODO
         }, PRIVATE_KEY, {
           algorithm: 'RS256',
           expiresIn: JWT_LIFE_SPAN,

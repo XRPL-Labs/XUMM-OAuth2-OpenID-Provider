@@ -18,12 +18,15 @@ module.exports = function handleACPKCETokenRequest (req, res) {
   }
 
   verifyAuthorizationCode(req.body.authorization_code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
-    .then(() => {
+    .then(entry => {
+      console.log('handleACPKCETokenRequest', {entry})
       const token = jwt.sign({
         client_id: req.body.client_id,
         state: req.body?.state || undefined,
         scope: req.body?.scope || undefined,
         nonce: req.body?.nonce || undefined,
+        aud: req.body.client_id,
+        sub: entry?.sub,
       }, PRIVATE_KEY, {
         algorithm: 'RS256',
         expiresIn: JWT_LIFE_SPAN,

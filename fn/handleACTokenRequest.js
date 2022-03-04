@@ -32,15 +32,17 @@ module.exports = function handleACTokenRequest (req, res) {
         }
       })
       .then(() => {
-        return verifyAuthorizationCode(req.body.authorization_code,
-          req.body.client_id, req.body.redirect_uri)
+        return verifyAuthorizationCode(req.body.authorization_code, req.body.client_id, req.body.redirect_uri)
       })
-      .then(() => {
+      .then(entry => {
+        console.log('handleACTokenRequest', {entry})
         const token = jwt.sign({
           client_id: req.body.client_id,
           state: req.body?.state || undefined,
-          scope: req.body?.scope || undefined,  
+          scope: req.body?.scope || undefined,
           nonce: req.body?.nonce || undefined,
+          aud: req.body.client_id,
+          sub: entry?.sub,
         }, PRIVATE_KEY, {
           algorithm: 'RS256',
           expiresIn: JWT_LIFE_SPAN,

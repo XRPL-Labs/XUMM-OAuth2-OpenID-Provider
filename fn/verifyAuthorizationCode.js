@@ -10,7 +10,8 @@ module.exports = function verifyAuthorizationCode (authorizationCode, clientId, 
     .run()
     .then(() => transaction.get(key))
     .then(result => {
-      const entry = result[0];
+      const entry = result[0]
+
       if (entry === undefined) {
         return Promise.reject(new Error('Invalid authorization code.'))
       }
@@ -47,9 +48,14 @@ module.exports = function verifyAuthorizationCode (authorizationCode, clientId, 
         return Promise.reject(new Error('Code challenge or code verifier does not exist.'))
       }
 
-      return transaction.delete(key)
+      transaction.delete(key)
+
+      return entry
     })
-    .then(() => transaction.commit())
+    .then(entry => {
+      transaction.commit()
+      return entry
+    })
     .catch(error => {
       console.log({error})
       transaction.rollback()
