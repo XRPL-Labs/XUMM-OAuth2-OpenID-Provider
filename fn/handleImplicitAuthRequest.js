@@ -5,7 +5,7 @@ module.exports = function handleImplicitAuthRequest (req, res) {
   console.log('handleImplicitAuthRequest')
 
   if (req.query.client_id === undefined || req.query.redirect_uri === undefined) {
-    return res.status(400).send(JSON.stringify({
+    return res.status(400).json(({
       error: 'invalid_request',
       error_description: 'Required parameters are missing in the request.'
     }))
@@ -29,7 +29,7 @@ module.exports = function handleImplicitAuthRequest (req, res) {
     })
     .catch(error => {
       if (error.message === 'Invalid client/redirect URL.') {
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'access_denied',
           error_description: error.message
         }))

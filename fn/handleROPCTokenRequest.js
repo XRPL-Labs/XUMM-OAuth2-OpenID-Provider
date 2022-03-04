@@ -10,7 +10,7 @@ module.exports = function handleROPCTokenRequest (req, res) {
   console.log('handleROPCTokenRequest')
 
   if (req.body.username === undefined || req.body.password === undefined || req.body.client_id === undefined || req.body.client_secret === undefined) {
-    return res.status(400).send(JSON.stringify({
+    return res.status(400).json(({
       error: 'invalid_request',
       error_description: 'Required parameters are missing in the request.'
     }))
@@ -46,15 +46,15 @@ module.exports = function handleROPCTokenRequest (req, res) {
         expiresIn: JWT_LIFE_SPAN,
         issuer: ISSUER
       })
-      res.status(200).send(JSON.stringify({
+      res.status(200).json(({
         access_token: token,
-        token_type: 'JWT',
+        token_type: 'bearer',
         expires_in: JWT_LIFE_SPAN
       }))
     })
     .catch(error => {
       if (error.message === 'Invalid client credentials.' || error.message === 'Invalid user credentials.') {
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'access_denied',
           error_description: error.message
         }))

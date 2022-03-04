@@ -20,7 +20,7 @@ module.exports = {
         } else if (!req.query.code_challenge && !req.query.code_challenge_method) {
           handleACAuthRequest(req, res)
         } else {
-          res.status(400).send(JSON.stringify({
+          res.status(400).json(({
             error: 'invalid_request',
             error_description: 'Required parameters are missing in the request.'
           }))
@@ -34,7 +34,7 @@ module.exports = {
         break
   
       default:
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'invalid_request',
           error_description: 'Grant type is invalid or missing.'
         }))
@@ -57,7 +57,7 @@ module.exports = {
           handleACPKCETokenRequest(req, res)
           break
         }
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'invalid_request',
           error_description: 'Client secret and code verifier are exclusive to each other.'
         }))
@@ -68,7 +68,7 @@ module.exports = {
       break
   
       default:
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'invalid_request',
           error_description: 'Grant type is invalid or missing.'
         }))

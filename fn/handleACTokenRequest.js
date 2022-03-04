@@ -48,7 +48,7 @@ module.exports = function handleACTokenRequest (req, res) {
           expiresIn: JWT_LIFE_SPAN,
           issuer: ISSUER,
         })
-        res.status(200).send(JSON.stringify({
+        res.status(200).json(({
           access_token: token,
           token_type: 'JWT',
           expires_in: JWT_LIFE_SPAN
@@ -56,7 +56,7 @@ module.exports = function handleACTokenRequest (req, res) {
       })
       .catch(error => {
         if (error.message === 'Invalid client credentials.' || error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.') {
-          res.status(400).send(JSON.stringify({
+          res.status(400).json(({
             error: 'access_denied',
             error_description: error.message
           }))

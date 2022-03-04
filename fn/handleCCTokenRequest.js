@@ -10,7 +10,7 @@ module.exports = function handleCCTokenRequest (req, res) {
   console.log('handleCCTokenRequest')
 
   if (req.body.client_id === undefined || req.body.client_secret === undefined) {
-    return res.status(400).send(JSON.stringify({
+    return res.status(400).json(({
       error: 'invalid_request',
       error_description: 'Required parameters are missing in the request.'
     }))
@@ -26,7 +26,7 @@ module.exports = function handleCCTokenRequest (req, res) {
     .runQuery(clientQuery)
     .then(result => {
       if (result[0].length === 0) {
-        return res.status(400).send(JSON.stringify({
+        return res.status(400).json(({
           error: 'access_denied',
           error_description: 'Invalid client credentials.'
         }))
@@ -43,9 +43,10 @@ module.exports = function handleCCTokenRequest (req, res) {
           expiresIn: JWT_LIFE_SPAN,
           issuer: ISSUER,
         })
-        res.status(200).send(JSON.stringify({
+        res.status(200).json(({
           access_token: token,
-          token_type: 'JWT',
+          refresh_token: '',
+          token_type: 'bearer',
           expires_in: JWT_LIFE_SPAN
         }))
       }

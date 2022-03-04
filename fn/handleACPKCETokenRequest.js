@@ -32,7 +32,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
         expiresIn: JWT_LIFE_SPAN,
         issuer: ISSUER,
       })
-      res.status(200).send(JSON.stringify({
+      res.status(200).json(({
         access_token: token,
         token_type: 'JWT',
         expires_in: JWT_LIFE_SPAN
@@ -40,12 +40,12 @@ module.exports = function handleACPKCETokenRequest (req, res) {
     })
     .catch(error => {
       if (error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.' || error.message === 'Code verifier does not match code challenge.') {
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'access_denied',
           error_description: error.message
         }))
       } else if (error.msg === 'Code challenge does not exist.') {
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'invalid_request',
           error_description: error.message
         }))
