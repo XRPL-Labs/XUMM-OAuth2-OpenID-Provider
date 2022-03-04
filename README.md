@@ -30,3 +30,6 @@ TOKEN=xxx
 
 curl -H "authorization: bearer $TOKEN" localhost:9000/me
 ```
+
+Nice test-tool:
+    - https://oauth.tools/collection/1599045265746-zCR
