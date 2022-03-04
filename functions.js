@@ -43,6 +43,22 @@ module.exports = {
     }
   },
   token (req, res) {
+    // If BASIC auth, mock client_id and client_secret
+    const b64auth = ((req.headers?.authorization || '').trim() || '').split(' ').reverse()[0] || ''
+    const strauth = Buffer.from(b64auth, 'base64').toString()
+    const splitIndex = strauth.indexOf(':')
+    console.log({b64auth, strauth, splitIndex})
+
+    let login
+    let password
+    if (splitIndex > -1 && !req.body?.client_id && !req.body?.client_secret) {
+      login = strauth.substring(0, splitIndex)
+      password = strauth.substring(splitIndex + 1)
+      // console.log({login, password})
+      req.body.client_id = login
+      req.body.client_secret = password
+    }
+
     switch (req.body.grant_type) {
       case 'password':
         handleROPCTokenRequest(req, res)
