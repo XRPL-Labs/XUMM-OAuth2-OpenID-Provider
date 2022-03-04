@@ -36,12 +36,13 @@ module.exports = function handleACPKCETokenRequest (req, res) {
     .then(entry => {
       console.log('handleACPKCETokenRequest', {entry})
       const token = jwt.sign({
-        client_id: req.body.client_id,
-        state: req.body?.state || undefined,
-        scope: req.body?.scope || undefined,
-        nonce: req.body?.nonce || undefined,
-        aud: req.body.client_id,
+        client_id: entry?.client_id,
+        state: entry?.state || undefined,
+        scope: entry?.scope || undefined,
+        aud: entry?.client_id,
         sub: entry?.sub,
+        nonce: entry?.nonce || undefined,
+        // TODO: custom user props matching config claims (user profile)
       }, PRIVATE_KEY, {
         algorithm: 'RS256',
         expiresIn: JWT_LIFE_SPAN,
@@ -49,6 +50,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
       })
       res.status(200).json(({
         access_token: token,
+        id_token: (entry?.scope || '').match(/openid/i) ? token : undefined,
         refresh_token: '',
         token_type: 'bearer',
         expires_in: JWT_LIFE_SPAN,
