@@ -90,7 +90,7 @@ module.exports = {
         break
   
       default:
-        res.status(400).send(JSON.stringify({
+        res.status(400).json(({
           error: 'invalid_request',
           error_description: 'Grant type is invalid or missing.'
         }))
