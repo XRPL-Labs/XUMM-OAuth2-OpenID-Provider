@@ -57,8 +57,11 @@ app.use('/.well-known/openid-configuration', async (req, res) => {
 
 app.use('/userinfo', jwtAuth, async (req, res) => {
   res.json({
-    name: 'Wietse',
-  })
+    sub: req.user.sub,
+    name: 'Wietse Wind',
+    picture: 'https://wietse.com/static/nodum/me.png',
+    locale: 'en',
+   })
 })
 
 app.use('/auth', auth)
