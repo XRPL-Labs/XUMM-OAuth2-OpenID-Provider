@@ -79,6 +79,7 @@ module.exports = function handleACSigninRequest (req, res) {
     .then(results => {
       res.redirect(appendQuery(req.body.redirect_uri, {
         authorization_code: results[1],
+        code: results[1],
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
       }))

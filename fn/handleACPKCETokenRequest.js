@@ -8,16 +8,16 @@ const jwt = require('jsonwebtoken')
 const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 
 module.exports = function handleACPKCETokenRequest (req, res) {
-  console.log('handleACPKCETokenRequest')
+  console.log('handleACPKCETokenRequest', req.body)
 
-  if (req.body.client_id === undefined || req.body.authorization_code === undefined || req.body.redirect_uri === undefined || req.body.code_verifier === undefined) {
-    return res.status(400).send(JSON.stringify({
+  if ((req.body.client_id === undefined && !login) || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined || req.body.code_verifier === undefined) {
+    return res.status(400).json(({
       error: 'invalid_request',
       error_description: 'Required parameters are missing in the request.'
     }))
   }
 
-  verifyAuthorizationCode(req.body.authorization_code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
+  verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
     .then(entry => {
       console.log('handleACPKCETokenRequest', {entry})
       const token = jwt.sign({

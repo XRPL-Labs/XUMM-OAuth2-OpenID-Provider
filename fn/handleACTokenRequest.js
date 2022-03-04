@@ -11,18 +11,18 @@ const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 module.exports = function handleACTokenRequest (req, res) {
     console.log('handleACTokenRequest')
   
-    if (req.body.client_id === undefined || req.body.client_secret === undefined || req.body.authorization_code === undefined || req.body.redirect_uri === undefined) {
-      return res.status(400).send(JSON.stringify({
+    if ((req.body.client_id === undefined && !login) || req.body.client_secret === undefined || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined) {
+      return res.status(400).json(({
         error: 'invalid_request',
         error_description: 'Required parameters are missing in the request.'
       }))
     }
   
     const clientQuery = datastore
-        .createQuery('client')
-        .filter('client-id', '=', req.body.client_id)
-        .filter('client-secret', '=', req.body.client_secret)
-        .filter('ac-enabled', '=', true)
+      .createQuery('client')
+      .filter('client-id', '=', req.body.client_id)
+      .filter('client-secret', '=', req.body.client_secret)
+      .filter('ac-enabled', '=', true)
   
     datastore
       .runQuery(clientQuery)
@@ -32,15 +32,15 @@ module.exports = function handleACTokenRequest (req, res) {
         }
       })
       .then(() => {
-        return verifyAuthorizationCode(req.body.authorization_code, req.body.client_id, req.body.redirect_uri)
+        return verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri)
       })
       .then(entry => {
         console.log('handleACTokenRequest', {entry})
         const token = jwt.sign({
           client_id: req.body.client_id,
-          state: req.body?.state || undefined,
-          scope: req.body?.scope || undefined,
-          nonce: req.body?.nonce || undefined,
+          state: entry?.state || undefined,
+          scope: entry?.scope || undefined,
+          nonce: entry?.nonce || undefined,
           aud: req.body.client_id,
           sub: entry?.sub,
         }, PRIVATE_KEY, {
