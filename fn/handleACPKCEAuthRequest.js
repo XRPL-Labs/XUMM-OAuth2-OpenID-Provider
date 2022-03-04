@@ -11,8 +11,8 @@ module.exports = function handleACPKCEAuthRequest (req, res) {
 
   const clientQuery = datastore
     .createQuery('client')
-    .filter('client-id', '=', req.body.client_id)
-    .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
+    .filter('client-id', '=', req.query.client_id)
+    .filter('redirect-url', 'LIKE', '%' + req.query.redirect_uri + '%')
     .filter('acpkce-enabled', '=', true)
 
   datastore
