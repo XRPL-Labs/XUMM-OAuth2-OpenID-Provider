@@ -5,9 +5,17 @@ const {ISSUER, PRIVATE_KEY} = config.jwt
 const {auth, signin, token} = require('./functions')
 
 const express = require('express')
+const helmet = require("helmet")
+
 const bodyParser = require('body-parser')
 
 const app = express()
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    formAction: null,
+    upgradeInsecureRequests: [],
+  },
+}))
 app.use(express.json())
 
 app.use(bodyParser.urlencoded({ extended: false }))
