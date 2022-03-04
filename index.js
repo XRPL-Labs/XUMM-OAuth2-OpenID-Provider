@@ -39,7 +39,15 @@ const jwtAuth = (req, res, next) => {
   })
 }
 
-app.use('/me', jwtAuth, async (req, res) => {
+app.use('/certs', async (req, res) => {
+  res.json({keys: config.openid.certs})
+})
+
+app.use('/.well-known/openid-configuration', async (req, res) => {
+  res.json(config.openid.discovery)
+})
+
+app.use('/userinfo', jwtAuth, async (req, res) => {
   res.json({
     name: 'Wietse',
   })
