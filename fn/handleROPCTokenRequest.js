@@ -5,10 +5,7 @@ module.exports = function handleROPCTokenRequest (req, res) {
   console.log('handleROPCTokenRequest')
 
   if (req.body.username === undefined || req.body.password === undefined || req.body.client_id === undefined || req.body.client_secret === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const clientQuery = datastore
@@ -44,10 +41,7 @@ module.exports = function handleROPCTokenRequest (req, res) {
     })
     .catch(error => {
       if (error.message === 'Invalid client credentials.' || error.message === 'Invalid user credentials.') {
-        res.status(400).json(({
-          error: 'access_denied',
-          error_description: error.message
-        }))
+        returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
         throw error;
       }

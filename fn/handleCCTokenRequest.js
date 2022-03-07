@@ -5,10 +5,7 @@ module.exports = function handleCCTokenRequest (req, res) {
   console.log('handleCCTokenRequest')
 
   if (req.body.client_id === undefined || req.body.client_secret === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const clientQuery = datastore
@@ -21,10 +18,7 @@ module.exports = function handleCCTokenRequest (req, res) {
     .runQuery(clientQuery)
     .then(result => {
       if (result[0].length === 0) {
-        return res.status(400).json(({
-          error: 'access_denied',
-          error_description: 'Invalid client credentials.'
-        }))
+        return returnError(req, res, 'access_denied', 'Invalid client credentials.', 400, {})
       } else {
         const token = getSignedJwt({
           client_id: req.body.client_id,

@@ -8,6 +8,7 @@ const handleROPCTokenRequest = require('./fn/handleROPCTokenRequest')
 const handleACTokenRequest = require('./fn/handleACTokenRequest')
 const handleACPKCETokenRequest = require('./fn/handleACPKCETokenRequest')
 const handleCCTokenRequest = require('./fn/handleCCTokenRequest')
+const returnError = require('./fn/returnError')
 
 module.exports = {
   auth (req, res) {
@@ -20,24 +21,18 @@ module.exports = {
         } else if (!req.query.code_challenge && !req.query.code_challenge_method) {
           handleACAuthRequest(req, res)
         } else {
-          res.status(400).json(({
-            error: 'invalid_request',
-            error_description: 'Required parameters are missing in the request.'
-          }))
+          returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
         }
 
         break
   
       case ('token'):
         handleImplicitAuthRequest(req, res)
-        
+
         break
   
       default:
-        res.status(400).json(({
-          error: 'invalid_request',
-          error_description: 'Grant type is invalid or missing.'
-        }))
+        returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
 
         break
     }
@@ -73,10 +68,8 @@ module.exports = {
           handleACPKCETokenRequest(req, res)
           break
         }
-        res.status(400).json(({
-          error: 'invalid_request',
-          error_description: 'Client secret and code verifier are exclusive to each other.'
-        }))
+
+        returnError(req, res, 'invalid_request', 'Client secret and code verifier are exclusive to each other.', 400, {})
       break
   
       case 'client_credentials':
@@ -84,10 +77,7 @@ module.exports = {
       break
   
       default:
-        res.status(400).json(({
-          error: 'invalid_request',
-          error_description: 'Grant type is invalid or missing.'
-        }))
+        returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
       break
     }
   },
@@ -106,10 +96,7 @@ module.exports = {
         break
   
       default:
-        res.status(400).json(({
-          error: 'invalid_request',
-          error_description: 'Grant type is invalid or missing.'
-        }))
+        returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
         break
     }
   }

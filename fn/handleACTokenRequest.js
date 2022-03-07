@@ -6,10 +6,7 @@ module.exports = function handleACTokenRequest (req, res) {
   console.log('handleACTokenRequest')
 
   if (req.body.client_id === undefined || req.body.client_secret === undefined || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const clientQuery = datastore
@@ -52,10 +49,7 @@ module.exports = function handleACTokenRequest (req, res) {
     })
     .catch(error => {
       if (error.message === 'Invalid client credentials.' || error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.') {
-        res.status(400).json(({
-          error: 'access_denied',
-          error_description: error.message
-        }))
+        returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
         throw error
       }

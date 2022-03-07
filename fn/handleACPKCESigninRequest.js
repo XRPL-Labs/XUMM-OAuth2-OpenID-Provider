@@ -10,10 +10,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
   console.log('handleACPKCESigninRequest')
 
   if (req.body.username === undefined || req.body.password === undefined || req.body.client_id === undefined || req.body.redirect_uri === undefined || req.body.code_challenge === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const userQuery = datastore

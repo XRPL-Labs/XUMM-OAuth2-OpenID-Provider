@@ -3,10 +3,7 @@ const renderSignInUi = require('./renderSignInUi')
 
 module.exports = function handleACPKCEAuthRequest (req, res) {
   if (req.query.client_id === undefined || req.query.redirect_uri === undefined || req.query.code_challenge === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const clientQuery = datastore
@@ -27,10 +24,7 @@ module.exports = function handleACPKCEAuthRequest (req, res) {
     })
     .catch(error => {
       if (error.message === 'Invalid client/redirect URL.') {
-        res.status(400).json(({
-          error: 'access_denied',
-          error_description: error.message
-        }));
+        returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
         throw error
       }

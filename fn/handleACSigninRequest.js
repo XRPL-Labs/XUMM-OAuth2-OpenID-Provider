@@ -10,10 +10,7 @@ module.exports = function handleACSigninRequest (req, res) {
   console.log('handleACSigninRequest')
 
   if (req.body.username === undefined || req.body.password === undefined || req.body.client_id === undefined || req.body.redirect_uri === undefined) {
-    return res.status(400).json(({
-      error: 'invalid_request',
-      error_description: 'Required parameters are missing in the request.'
-    }))
+    return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
   const userQuery = datastore
@@ -85,6 +82,6 @@ module.exports = function handleACSigninRequest (req, res) {
     })
     .catch (e => {
       console.log('error', e.message)
-      return res.status(400).send('Nope, error: ' + e.message)
+      return returnError(req, res, 'fatal', e.message, 400, {})
     })
 }
