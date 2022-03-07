@@ -1,11 +1,6 @@
-const config = require('../config')
-
+const getSignedJwt = require('./getSignedJwt')
 const verifyAuthorizationCode = require('./verifyAuthorizationCode')
-
 const datastore = require('../datastore')
-const jwt = require('jsonwebtoken')
-
-const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 
 module.exports = function handleACTokenRequest (req, res) {
   console.log('handleACTokenRequest')
@@ -35,7 +30,7 @@ module.exports = function handleACTokenRequest (req, res) {
     })
     .then(entry => {
       console.log('handleACTokenRequest', {entry})
-      const token = jwt.sign({
+      const token = getSignedJwt({
         client_id: entry?.client_id,
         state: entry?.state || undefined,
         scope: entry?.scope || undefined,
@@ -43,18 +38,12 @@ module.exports = function handleACTokenRequest (req, res) {
         sub: entry?.sub,
         nonce: entry?.nonce || undefined,
         // TODO: custom user props matching config claims (user profile)
-      }, PRIVATE_KEY, {
-        algorithm: 'RS256',
-        expiresIn: JWT_LIFE_SPAN,
-        issuer: ISSUER,
       })
-
+      
       const jwtResponseData = {
-        access_token: token,
-        id_token: (entry?.scope || '').match(/openid/i) ? token : undefined,
+        ...token,
+        id_token: (entry?.scope || '').match(/openid/i) ? token.access_token : undefined,
         refresh_token: '',
-        token_type: 'bearer',
-        expires_in: JWT_LIFE_SPAN,
         scope: entry?.scope || undefined,
       }
 

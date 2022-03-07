@@ -1,10 +1,5 @@
-const config = require('../config')
-
 const datastore = require('../datastore')
-const fs = require('fs')
-const jwt = require('jsonwebtoken')
-
-const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
+const getSignedJwt = require('./getSignedJwt')
 
 module.exports = function handleROPCTokenRequest (req, res) {
   console.log('handleROPCTokenRequest')
@@ -41,15 +36,10 @@ module.exports = function handleROPCTokenRequest (req, res) {
       }
     })
     .then(() => {
-      const token = jwt.sign({}, PRIVATE_KEY, {
-        algorithm: 'RS256',
-        expiresIn: JWT_LIFE_SPAN,
-        issuer: ISSUER
-      })
+      const token = getSignedJwt({})
+
       res.status(200).json(({
-        access_token: token,
-        token_type: 'bearer',
-        expires_in: JWT_LIFE_SPAN
+        ...token,
       }))
     })
     .catch(error => {

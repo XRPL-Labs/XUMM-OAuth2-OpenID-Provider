@@ -1,10 +1,5 @@
-const config = require('../config')
-
+const getSignedJwt = require('./getSignedJwt')
 const datastore = require('../datastore')
-const fs = require('fs')
-const jwt = require('jsonwebtoken')
-
-const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 
 module.exports = function handleCCTokenRequest (req, res) {
   console.log('handleCCTokenRequest')
@@ -31,23 +26,18 @@ module.exports = function handleCCTokenRequest (req, res) {
           error_description: 'Invalid client credentials.'
         }))
       } else {
-        const token = jwt.sign({
+        const token = getSignedJwt({
           client_id: req.body.client_id,
           state: req.body?.state || undefined,
           scope: req.body?.scope || undefined,  
           nonce: req.body?.nonce || undefined,
           aud: req.body.client_id,
           sub: null, // TODO
-        }, PRIVATE_KEY, {
-          algorithm: 'RS256',
-          expiresIn: JWT_LIFE_SPAN,
-          issuer: ISSUER,
         })
+
         res.status(200).json(({
-          access_token: token,
+          ...token,
           refresh_token: '',
-          token_type: 'bearer',
-          expires_in: JWT_LIFE_SPAN
         }))
       }
     })

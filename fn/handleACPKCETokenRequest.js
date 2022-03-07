@@ -1,11 +1,6 @@
-const config = require('../config')
-
 const verifyAuthorizationCode = require('./verifyAuthorizationCode')
-
+const getSignedJwt = require('./getSignedJwt')
 const datastore = require('../datastore')
-const jwt = require('jsonwebtoken')
-
-const {ISSUER, JWT_LIFE_SPAN, PRIVATE_KEY} = config.jwt
 
 module.exports = function handleACPKCETokenRequest (req, res) {
   console.log('handleACPKCETokenRequest', req.body)
@@ -35,7 +30,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
     })
     .then(entry => {
       console.log('handleACPKCETokenRequest', {entry})
-      const token = jwt.sign({
+      const token = getSignedJwt({
         client_id: entry?.client_id,
         state: entry?.state || undefined,
         scope: entry?.scope || undefined,
@@ -43,17 +38,12 @@ module.exports = function handleACPKCETokenRequest (req, res) {
         sub: entry?.sub,
         nonce: entry?.nonce || undefined,
         // TODO: custom user props matching config claims (user profile)
-      }, PRIVATE_KEY, {
-        algorithm: 'RS256',
-        expiresIn: JWT_LIFE_SPAN,
-        issuer: ISSUER,
       })
+
       res.status(200).json(({
-        access_token: token,
-        id_token: (entry?.scope || '').match(/openid/i) ? token : undefined,
+        ...token,
+        id_token: (entry?.scope || '').match(/openid/i) ? token.access_token : undefined,
         refresh_token: '',
-        token_type: 'bearer',
-        expires_in: JWT_LIFE_SPAN,
         scope: entry?.scope || undefined,
       }))
     })
