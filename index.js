@@ -14,6 +14,10 @@ app.use(helmet.contentSecurityPolicy({
   directives: {
     formAction: null,
     upgradeInsecureRequests: [],
+    scriptSrc: [ "'self'", "https://xumm.app", "https://kit.fontawesome.com" ],
+    connectSrc: [ "'self'", "https://xumm.app", "https://kit.fontawesome.com", "https://*.fontawesome.com" ],
+    imgSrc: [ "'self'", "https://xumm.app" ],
+    styleSrc: [ "'self'", "https://xumm.app", "'unsafe-inline'", "https://fonts.googleapis.com", "https://stackpath.bootstrapcdn.com", "https://kit.fontawesome.com", "https://use.typekit.net", "https://p.typekit.net", "https://*.fontawesome.com" ],
   },
 }))
 app.use(express.json())
