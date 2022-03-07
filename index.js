@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const config = require('./config')
 const {ISSUER, PRIVATE_KEY} = config.jwt
-const returnError = require('./returnError')
+const returnError = require('./fn/returnError')
 const {auth, signin, token} = require('./functions')
 
 const express = require('express')
