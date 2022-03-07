@@ -22,6 +22,28 @@ app.use(helmet.contentSecurityPolicy({
 }))
 app.use(express.json())
 
+app.use((req, res, next) => {
+  let backendProbability = 0
+  const amountOfUsableHeaders = Object.keys(req.headers).filter(k => k.slice(0, 3).toLowerCase() !== 'cf-' && k.slice(0, 2).toLowerCase() !== 'x-').length
+
+  if (amountOfUsableHeaders < 6) backendProbability += 0.4
+  if (req.headers?.referer) backendProbability += 0.2
+  if (req.headers?.['upgrade-insecure-requests']) backendProbability -= 0.2
+  if (req.headers?.['cache-control']) backendProbability -= 0.1
+  if (req.headers?.['accept-language']) backendProbability -= 0.1
+  if (req.headers?.['sec-fetch-site']) backendProbability -= 0.2
+  if ((req.headers?.['user-agent'] || '').match(/mozilla|intel|firefox|gecko|webkit|safari|windows|chrome|x11/i)) backendProbability -= 0.1
+  if ((req.headers?.accept || '').match(/application\/json/i)) backendProbability += 0.4
+  if ((req.headers?.accept || '').match(/text\/html/i)) backendProbability -= 0.4
+  if (req.headers?.accept === '*/*') backendProbability += 0.4
+
+  if (backendProbability >= 0.4) {
+    req.server2server = true
+  }
+
+  next()
+})
+
 app.use(bodyParser.urlencoded({ extended: false }))
 
 const jwtAuth = (req, res, next) => {
