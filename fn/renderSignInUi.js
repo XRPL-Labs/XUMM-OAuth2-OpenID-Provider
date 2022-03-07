@@ -1,6 +1,7 @@
 const path = require('path')
 const pug = require('pug')
 const {db} = require('../datastore')
+const returnError = require('./returnError')
 
 async function getClientDetails (client_id) {
   try {
@@ -25,12 +26,7 @@ module.exports = async function renderSignInUi (req, res, options) {
   const clientDetails = await getClientDetails(req.query.client_id)
 
   if (!clientDetails?.['signin-method']) {
-    const html = pug.renderFile(path.join(__dirname, '..', 'error.pug'), {
-      error_type: clientDetails?.error_type,
-      error_message: 'Invalid client / unknown client_id'
-    })
-
-    return res.status(500).send(html)
+    return returnError(req, res, clientDetails?.error_typ, 'Invalid client / unknown client_id.', 500, {})
   }
 
   const html = pug.renderFile(path.join(__dirname, '..', 'auth.pug'), {
