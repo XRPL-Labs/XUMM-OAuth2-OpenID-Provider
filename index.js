@@ -94,6 +94,8 @@ app.use('/auth', auth)
 app.use('/signin', signin)
 app.use('/token', token)
 
+app.use('/assets', express.static('./assets'))
+
 app.listen(config.port, () => {
   console.log(`Service listening at :${config.port}`)
 })
