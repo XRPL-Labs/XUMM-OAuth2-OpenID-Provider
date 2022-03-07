@@ -1,7 +1,6 @@
 const config = require('../config')
-
 const appendQuery = require('append-query')
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 const fernet = require('fernet')
 
 const {CODE_LIFE_SPAN} = config.jwt

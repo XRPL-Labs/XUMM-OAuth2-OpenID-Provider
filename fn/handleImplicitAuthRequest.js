@@ -1,4 +1,4 @@
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 const renderSignInUi = require('./renderSignInUi')
 
 module.exports = function handleImplicitAuthRequest (req, res) {

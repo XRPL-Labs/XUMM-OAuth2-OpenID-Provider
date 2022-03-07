@@ -1,6 +1,6 @@
 const getSignedJwt = require('./getSignedJwt')
 const appendQuery = require('append-query')
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 
 module.exports = function handleImplictSigninRequest (req, res) {
   console.log('handleImplictSigninRequest')

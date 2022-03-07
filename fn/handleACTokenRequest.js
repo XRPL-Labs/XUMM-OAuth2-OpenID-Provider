@@ -1,6 +1,6 @@
 const getSignedJwt = require('./getSignedJwt')
 const verifyAuthorizationCode = require('./verifyAuthorizationCode')
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 
 module.exports = function handleACTokenRequest (req, res) {
   console.log('handleACTokenRequest')

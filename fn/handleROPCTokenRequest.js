@@ -1,4 +1,4 @@
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 const getSignedJwt = require('./getSignedJwt')
 
 module.exports = function handleROPCTokenRequest (req, res) {

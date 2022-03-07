@@ -239,4 +239,8 @@ class DatastoreTransaction {
   }
 }
 
-module.exports = new Datastore()
+module.exports = {
+  datastore: new Datastore(),
+  db
+}
+

@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 
 module.exports = function verifyAuthorizationCode (authorizationCode, clientId, redirectUrl, codeVerifier = undefined) {
   console.log('verifyAuthorizationCode')

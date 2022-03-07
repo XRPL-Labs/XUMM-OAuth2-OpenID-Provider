@@ -1,5 +1,5 @@
 const getSignedJwt = require('./getSignedJwt')
-const datastore = require('../datastore')
+const {datastore} = require('../datastore')
 
 module.exports = function handleCCTokenRequest (req, res) {
   console.log('handleCCTokenRequest')
