@@ -1,5 +1,6 @@
 const {datastore} = require('../datastore')
 const getSignedJwt = require('./getSignedJwt')
+const returnError = require('./returnError')
 
 module.exports = function handleROPCTokenRequest (req, res) {
   console.log('handleROPCTokenRequest')

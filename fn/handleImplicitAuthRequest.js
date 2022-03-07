@@ -1,5 +1,6 @@
 const {datastore} = require('../datastore')
 const renderSignInUi = require('./renderSignInUi')
+const returnError = require('./returnError')
 
 module.exports = function handleImplicitAuthRequest (req, res) {
   console.log('handleImplicitAuthRequest')

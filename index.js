@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const config = require('./config')
 const {ISSUER, PRIVATE_KEY} = config.jwt
-
+const returnError = require('./returnError')
 const {auth, signin, token} = require('./functions')
 
 const express = require('express')
@@ -50,10 +50,7 @@ const jwtAuth = (req, res, next) => {
   const authHeader = req.headers?.authorization
   const token = authHeader && authHeader.trim().split(' ').reverse()[0].trim()
 
-  if (token == null) return res.status(401).json({
-    error: 'invalid_jwt',
-    error_description: 'No JWT token (auth) specified'
-  })
+  if (token == null) return returnError(req, res, 'invalid_jwt', 'No JWT token (auth) specified.', 401, {})
 
   jwt.verify(token, PRIVATE_KEY, {
     algorithms: ['RS256'],
@@ -61,11 +58,7 @@ const jwtAuth = (req, res, next) => {
   }, (err, user) => {
     console.log({err: err ? err.message : false, user})
 
-    if (err) return res.status(403).json({
-      error: 'jwt_auth_error',
-      error_description: err?.message || 'Unspecified',
-      details: err
-    })
+    if (err) return returnError(req, res, 'jwt_auth_error', err?.message || 'Unspecified', 403, err)
 
     req.user = user
 
