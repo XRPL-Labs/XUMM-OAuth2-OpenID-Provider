@@ -1,0 +1,7 @@
+.lh-100 { line-height: 1.0em; }
+.lh-120 { line-height: 1.2em; }
+.overflow-hidden { overflow: hidden; }
+
+.show-sign-request { opacity: .7; }
+.show-sign-request:hover>span { text-decoration: underline; }
+.vjs-value.vjs-value__string { overflow-wrap: break-word; } /* Issue #263 */

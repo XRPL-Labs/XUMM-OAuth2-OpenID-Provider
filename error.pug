@@ -1,0 +1,57 @@
+doctype html
+head
+  meta(charset='utf-8')
+  title XUMM Sign In Gateway
+  link(rel='icon' type='image/png' sizes='32x32' href='https://xumm.app/assets/icons/favicon-32x32.png')
+  link(rel='icon' type='image/png' sizes='16x16' href='https://xumm.app/assets/icons/favicon-16x16.png')
+  link(rel='manifest' href='/assets/site.webmanifest')
+  link(rel='shortcut icon' href='https://xumm.app/assets/icons/favicon.ico')
+  meta(name='msapplication-TileColor' content='#da532c')
+  meta(name='msapplication-config' content='https://xumm.app/assets/icons/browserconfig.xml')
+  meta(name='theme-color' content='#ffffff')
+  meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+  meta(name='author' content='@XRPLLabs, xrpl-labs.com')
+  meta(name='generator' content='@XRPLLabs')
+  meta(name='description' content='Sign In Gateway: use your XPR Ledger account to sign in.')
+  link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css' integrity='sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO' crossorigin='anonymous')
+  script(src='https://kit.fontawesome.com/fa35e16c8d.js' crossorigin='anonymous')
+  link(href='https://fonts.googleapis.com/css?family=Fredoka+One&display=swap' rel='stylesheet')
+  link(rel='stylesheet' href='https://use.typekit.net/vtt7ckl.css')
+  link(rel='stylesheet' href='/assets/home.css' crossorigin='anonymous')
+  link(rel='stylesheet' href='/assets/sign_vue.css' crossorigin='anonymous')
+section.bg-white(name='head')
+  section.py-5(name='menu')
+    .container.d-block.d-md-flexx.flexx-wrap.text-center
+      .row
+        .text-md-left.col-12.col-sm-4.col-md-3
+          a.pt-2.mb-3.mr-4(href='/')
+            img.x-float-left.mr-3(src='/assets/images/logo-xumm.svg' alt='XRPL Labs')
+          .d-md-none.mt-3.mb-3
+        .col-12.col-sm-8.col-md-9
+          .flexx-fill.text-right(style='style: relative; margin-top: -4px;')
+            a.shadow-sm.btn.border-2.border-primary.btn-info.btn-sm(href='https://xumm.app')
+              i.fas.fa-book
+              |     About XUMM
+  .container
+    .container.pb-4
+      .row
+        .col-12.col-md-6.offset-md-3.pt-md-5.pb-md-5
+          .card.shadow-sm
+            .card-header.bg-danger.text-white.font-weight-bold
+              i.fas.fa-clock
+              | #{error_type ? ' Error: ' + error_type : ' Error'}
+            .card-body
+              | #{error_message || 'Unknown exception'}
+section.py-4.border-top.border-light(name='footer')
+  .container.text-muted
+    .footer-text.text-left.pb-1
+      | &copy; 
+      a.text-muted(href='https://xrpl-labs.com/')
+        u XRPL Labs
+      |             &dash; 
+      a.text-muted(href='https://github.com/XRPL-Labs/XUMM-Issue-Tracker/blob/master/RESPONSIBLE-DISCLOSURE.md' target='_blank')
+        u Responsible Disclosure
+      br
+      a(href='https://xrpl-labs.com/')
+        img.mr-3.mb-3(src='/assets/images/logo-xrpl.svg' alt='XRPL Labs')
+
