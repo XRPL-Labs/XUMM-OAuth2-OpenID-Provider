@@ -11,15 +11,25 @@ const genHash = function genHash (client, token) {
   return { token: _token, hash: tokenhash }
 }
 
-const getSdkByClient = function getSdkByClient (client) {
-  // TODO: use real credentials
-  return new XummSdk('8525e32b-1bd0-4839-af2f-f794874a80b0', '91d50d20-258c-4ed6-b371-9510e348e4c9')
+const getSdkByClient = async function getSdkByClient (client) {
+  const sdkClientQuery = datastore.createQuery('client')
+    .filter('client-id', '=', client)
+
+  const sdkClientRecord = await datastore.runQuery(sdkClientQuery)
+
+  if (Array.isArray(sdkClientRecord) && sdkClientRecord.length > 0) {
+    if (Array.isArray(sdkClientRecord[0]) && sdkClientRecord[0].length > 0) {
+      return new XummSdk(sdkClientRecord[0][0]['client-id'], sdkClientRecord[0][0]['client-secret'])
+    }
+  }
+
+  return new XummSdk('---', '---')
 }
 
 module.exports = {
   initiateXummSignin: async function initiateXummSignin (req, res) {
     try {
-      const Sdk = getSdkByClient(req.query.client_id)
+      const Sdk = await getSdkByClient(req.query.client_id)
       const {token, hash} = genHash(req.query.client_id)
 
       const payload = await Sdk.payload.create({
@@ -39,9 +49,9 @@ module.exports = {
 
       if (payload && typeof payload?.uuid === 'string') {
         datastore.upsert({fields: {
-            client: req.query.client_id,
-            payload: payload.uuid,
-            params: JSON.stringify(req.query)
+          client: req.query.client_id,
+          payload: payload.uuid,
+          params: JSON.stringify(req.query)
         }})
 
         return res.redirect(payload.next.always)
@@ -81,7 +91,7 @@ module.exports = {
 
               datastore.updateQuery(challengeQuery, { consumed: 1 })
 
-              const Sdk = getSdkByClient(req.query.client_id)
+              const Sdk = await getSdkByClient(req.query.client_id)
               const signInResult = await Sdk.payload.get(req.query.payload)
               const account = signInResult?.response?.account
               const password = crypto.createHash('sha256').update(account + config.secret).digest('hex')
