@@ -11,7 +11,10 @@
   "engines": {
     "node": "16.x.x"
   },
-  "scripts": {},
+  "scripts": {
+    "dev": "nodemon",
+    "pm2": "pm2 startOrReload pm2.config.js --update-env"
+  },
   "dependencies": {
     "append-query": "^2.0.1",
     "body-parser": "^1.19.1",
