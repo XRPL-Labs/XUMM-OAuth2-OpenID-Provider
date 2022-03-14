@@ -30,12 +30,11 @@ module.exports = function handleACTokenRequest (req, res) {
       console.log('handleACTokenRequest', {entry})
       const token = getSignedJwt({
         client_id: entry?.client_id,
-        state: entry?.state || undefined,
+        // state: entry?.state || undefined,
         scope: entry?.scope || undefined,
         aud: entry?.client_id,
         sub: entry?.sub,
         nonce: entry?.nonce || undefined,
-        // TODO: custom user props matching config claims (user profile)
       })
       
       const jwtResponseData = {

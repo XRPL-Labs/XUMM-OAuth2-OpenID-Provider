@@ -20,6 +20,38 @@ class DatastoreQuery {
     return this
   }
 
+  async update (data) {
+    // console.log(this.m_dataset, this.m_filter, data)
+    const conn = await db.getConnection()
+
+    const updateValues = Object.keys(data).map(f => {
+      return '`' + f + '` = ?'
+    }).join(', ')
+
+    const whereQuery = this.m_filter.map(f => {
+      return '`' + f.key + '` ' + f.operator + ' ?'
+    }).join(' AND ')
+
+    const query = `
+      UPDATE ${this.m_dataset}s
+      SET ${updateValues}  
+      WHERE ${whereQuery}
+    `
+
+    const params = [
+      ...Object.keys(data).map(k => data[k]),
+      ...this.m_filter.map(f => f.value)
+    ]
+
+    // console.log(query, params)
+
+    const results = await conn.execute(query, params)
+
+    conn.release()
+
+    return results
+  }
+
   async get () {
     if (this.m_dataset === 'user') {
       const conn = await db.getConnection()
@@ -27,7 +59,8 @@ class DatastoreQuery {
       const results = await conn.execute(`
         SELECT id,
                username,
-               password
+               password,
+               xrpl_account
           FROM users
          WHERE username = ?
          LIMIT 1
@@ -39,18 +72,24 @@ class DatastoreQuery {
         if (Array.isArray(results[0]) && results[0].length > 0) {
           const result = (await Promise.all(results[0].map(async r => {
             const outcome = await new Promise((resolve, reject) => {
+              if ((Number(r?.xrpl_account || 0) || 0) > 0) {
+                // XRPL account, no need for password check if XUMM flow.
+                const account = this.m_filter.filter(f => f.key === 'username').map(f => f.value)[0]
+                const pwhash = crypto.createHash('sha256').update(account + config.secret).digest('hex')
+                if (this.m_filter.filter(f => f.key === 'password').map(f => f.value)[0] === pwhash) {
+                  // console.log('xrpl account outcome r', r, this.m_filter.filter(f => f.key === 'password').map(f => f.value)[0])
+                  return resolve({...r, safe: true})
+                }
+              }
               crypto.pbkdf2(this.m_filter.filter(f => f.key === 'password').map(f => f.value)[0], String(r.id), 100000, 64, 'sha512', (err, derivedKey) => {
                 if (err) {
                   console.log(err)
                   return reject(err)
                 }
                 const hashhalf = derivedKey.toString('hex').slice(0, 64)
-                console.log({hashhalf})
-                Object.assign(r, {
-                  safe: hashhalf === r.password
-                })
+                // console.log({hashhalf})
 
-                resolve(r)
+                resolve({...r, safe: hashhalf === r.password})
               })
             })
 
@@ -100,6 +139,17 @@ class Datastore {
     return new DatastoreQuery(dataset)
   }
 
+  async updateQuery (datstoreQuery, newData) {
+    try {
+      const queryResults = await datstoreQuery.update(newData)
+      console.log('updateQuery', newData, queryResults)
+      return true
+    } catch (e) {
+      console.log('error', e.message)
+      return false
+    }
+  }
+
   async runQuery (datstoreQuery) {
     try {
       const queryResults = await datstoreQuery.get()
@@ -130,15 +180,30 @@ class Datastore {
     })
 
     const conn = await db.getConnection()
+    let table = ''
+
     if (upsertData?.authorization_code) {
-      console.log('Use MySQL database @ ', 'grants')
-      await conn.execute('INSERT INTO `grants`' + `
-               (${Object.keys(upsertData).join(', ')})
-        VALUES (${Object.keys(upsertData).map(v => '?').join(', ')})
-      `, Object.keys(upsertData).map(k => upsertData[k] || null))
+      table = 'grants'
+    } else
+    if (upsertData?.xrpl_account) {
+      table = 'users'
+    } else
+    if (upsertData?.payload) {
+      table = 'xumm_challenges'
     } else {
       throw new Error('Error, unknown dataset to upsert to')
     }
+
+    console.log('Use MySQL database @ ', table)
+    await conn.execute('INSERT IGNORE INTO `' + table + '`' + `
+             (${Object.keys(upsertData).join(', ')})
+      VALUES (${Object.keys(upsertData).map(v => '?').join(', ')})
+      ON DUPLICATE KEY UPDATE
+        ${Object.keys(upsertData).map(v => '`' + v + '` = ?').join(', ')}
+    `, [
+      ...Object.keys(upsertData).map(k => upsertData[k] || null),
+      ...Object.keys(upsertData).map(k => upsertData[k] || null),
+    ])
 
     conn.release()
   }

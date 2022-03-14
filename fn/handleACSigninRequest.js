@@ -3,6 +3,7 @@ const appendQuery = require('append-query')
 const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 const fernet = require('fernet')
+const redirectUriCheck = require('./redirectUriCheck')
 
 const {CODE_LIFE_SPAN} = config.jwt
 const fernetToken = new fernet.Token({ secret: new fernet.Secret(config.secret) })
@@ -14,6 +15,8 @@ module.exports = function handleACSigninRequest (req, res) {
     return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
+  console.log('acrequest', req.body)
+
   const userQuery = datastore
     .createQuery('user')
     .filter('username', '=', req.body.username)
@@ -22,7 +25,7 @@ module.exports = function handleACSigninRequest (req, res) {
   const clientQuery = datastore
     .createQuery('client')
     .filter('client-id', '=', req.body.client_id)
-    .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
+    // .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
     .filter('ac-enabled', '=', true)
 
   let sub = null // username
@@ -30,6 +33,7 @@ module.exports = function handleACSigninRequest (req, res) {
   datastore
     .runQuery(userQuery)
     .then(result => {
+      console.log('sign in userquery result', result)
       if (result[0].length === 0) {
         return Promise.reject(new Error('Invalid user credentials.'))
       } else {
@@ -40,7 +44,7 @@ module.exports = function handleACSigninRequest (req, res) {
       return datastore.runQuery(clientQuery)
     })
     .then(result => {
-      if (result[0].length === 0) {
+      if (!redirectUriCheck(result, req.body.redirect_uri)) {
         return Promise.reject(new Error('Invalid client and/or redirect URL.'))
       }
     })

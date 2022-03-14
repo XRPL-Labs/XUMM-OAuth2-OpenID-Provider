@@ -9,6 +9,7 @@ const handleACTokenRequest = require('./fn/handleACTokenRequest')
 const handleACPKCETokenRequest = require('./fn/handleACPKCETokenRequest')
 const handleCCTokenRequest = require('./fn/handleCCTokenRequest')
 const returnError = require('./fn/returnError')
+const {handleXummSignin} = require('./fn/xummSignin')
 
 module.exports = {
   auth (req, res) {
@@ -82,22 +83,34 @@ module.exports = {
     }
   },
   signin (req, res) {
-    switch (req?.body?.response_type ? req.body.response_type : req?.query?.response_type) {
-      case ('code'):
-        if (!req.body.code_challenge) {
-          handleACSigninRequest(req, res)
-        } else {
-          handleACPKCESigninRequest(req, res)
-        }
-        break
+    // Todo: handle XUMM Sign In request
+    const _xummHandled = handleXummSignin(req, res)
+
+    ;(_xummHandled || Promise.resolve(_xummHandled)).then(xummHandled => {
+      // console.log('typeof xummHandled', typeof xummHandled, xummHandled)
+      if (typeof xummHandled !== 'undefined') {
+        return xummHandled
+      }
+
+      console.log('req?.body', req.body)
   
-      case ('token'):
-        handleImplictSigninRequest(req, res)
-        break
-  
-      default:
-        returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
-        break
-    }
+      switch (req?.body?.response_type ? req.body.response_type : req?.query?.response_type) {
+        case ('code'):
+          if (!req.body.code_challenge) {
+            handleACSigninRequest(req, res)
+          } else {
+            handleACPKCESigninRequest(req, res)
+          }
+          break
+    
+        case ('token'):
+          handleImplictSigninRequest(req, res)
+          break
+    
+        default:
+          returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
+          break
+      }
+    })
   }
 }

@@ -3,6 +3,7 @@ const appendQuery = require('append-query')
 const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 const fernet = require('fernet')
+const redirectUriCheck = require('./redirectUriCheck')
 
 const {CODE_LIFE_SPAN} = config.jwt
 const fernetToken = new fernet.Token({ secret: new fernet.Secret(config.secret) })
@@ -22,7 +23,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
   const clientQuery = datastore
     .createQuery('client')
     .filter('client-id', '=', req.body.client_id)
-    .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
+    // .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
     .filter('acpkce-enabled', '=', true)
 
   let sub = null // username
@@ -40,7 +41,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
       return datastore.runQuery(clientQuery)
     })
     .then(result => {
-      if (result[0].length === 0) {
+      if (!redirectUriCheck(result, req.body.redirect_uri)) {
         return Promise.reject(new Error('Invalid client and/or redirect URL.'))
       }
     })

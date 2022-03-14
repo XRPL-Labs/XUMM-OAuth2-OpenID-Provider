@@ -2,6 +2,7 @@ const getSignedJwt = require('./getSignedJwt')
 const appendQuery = require('append-query')
 const {datastore} = require('../datastore')
 const returnError = require('./returnError')
+const redirectUriCheck = require('./redirectUriCheck')
 
 module.exports = function handleImplictSigninRequest (req, res) {
   console.log('handleImplictSigninRequest')
@@ -18,7 +19,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
   const clientQuery = datastore
     .createQuery('client')
     .filter('client-id', '=', req.body.client_id)
-    .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
+    // .filter('redirect-url', 'LIKE', '%' + req.body.redirect_uri + '%')
     .filter('implicit-enabled', '=', true)
 
   let sub = null // username
@@ -36,7 +37,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
       return datastore.runQuery(clientQuery)
     })
     .then(result => {
-      if (result[0].length === 0) {
+      if (!redirectUriCheck(result, req.body.redirect_uri)) {
         return Promise.reject(new Error('Invalid client and/or redirect URL.'))
       }
     })

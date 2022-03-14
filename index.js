@@ -3,9 +3,10 @@ const config = require('./config')
 const {ISSUER, PRIVATE_KEY} = config.jwt
 const returnError = require('./fn/returnError')
 const {auth, signin, token} = require('./functions')
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args))
 
 const express = require('express')
-const helmet = require("helmet")
+const helmet = require('helmet')
 
 const bodyParser = require('body-parser')
 
@@ -75,11 +76,13 @@ app.use('/.well-known/openid-configuration', async (req, res) => {
 })
 
 app.use('/userinfo', jwtAuth, async (req, res) => {
+  const xummInfoCall = await fetch('https://xumm.app/api/v1/app/account-info/' + req.user.sub)
+  const xummInfo = await xummInfoCall.json()
+
   res.json({
     sub: req.user.sub,
-    name: 'Wietse Wind',
-    picture: 'https://wietse.com/static/nodum/me.png',
-    locale: 'en',
+    picture: `https://xumm.app/avatar/${req.user.sub}.png`,
+    ...(xummInfo?.account ? xummInfo : {}),
    })
 })
 

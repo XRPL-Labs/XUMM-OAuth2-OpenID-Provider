@@ -1,6 +1,7 @@
 const {datastore} = require('../datastore')
 const renderSignInUi = require('./renderSignInUi')
 const returnError = require('./returnError')
+const redirectUriCheck = require('./redirectUriCheck')
 
 module.exports = function handleACAuthRequest (req, res) {
   console.log('handleACAuthRequest')
@@ -11,13 +12,13 @@ module.exports = function handleACAuthRequest (req, res) {
   const clientQuery = datastore
     .createQuery('client')
     .filter('client-id', '=', req.query.client_id)
-    .filter('redirect-url', 'LIKE', '%' + req.query.redirect_uri + '%')
+    // .filter('redirect-url', 'LIKE', '%' + req.query.redirect_uri + '%')
     .filter('ac-enabled', '=', true);
 
   datastore
     .runQuery(clientQuery)
     .then(result => {
-      if (result[0].length === 0) {
+      if (!redirectUriCheck(result, req.query.redirect_uri)) {
         return Promise.reject(new Error('Invalid client/redirect URL.'))
       }
     })
