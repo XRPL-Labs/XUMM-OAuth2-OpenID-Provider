@@ -153,7 +153,7 @@ class Datastore {
   async runQuery (datstoreQuery) {
     try {
       const queryResults = await datstoreQuery.get()
-      console.log('runQuery', queryResults)
+      // console.log('runQuery', queryResults)
       return [ queryResults ]
     } catch (e) {
       console.log('error', e.message)

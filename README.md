@@ -33,3 +33,25 @@ curl -H "authorization: bearer $TOKEN" localhost:9000/me
 
 Nice test-tool:
     - https://oauth.tools/collection/1599045265746-zCR
+
+## XUMM Database
+
+Clients:
+```
+CREATE VIEW
+  clients
+AS 
+SELECT
+    `application_id` as id,
+    `application_uuidv4_txt` as `client-id`,
+    `application_redirect_uris` as `redirect-url`,
+    `application_secret_txt` as `client-secret`,
+    0 as `implicit-enabled`,
+    1 as `ac-enabled`,
+    1 as `acpkce-enabled` ,
+    0 as `ropc-enabled`,
+    0 as `cc-enabled`,
+    'XUMMAPI' as `signin-method`
+FROM
+    `xrpllabs_sp`.`applications`
+```
