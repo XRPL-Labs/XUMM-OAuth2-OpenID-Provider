@@ -91,7 +91,7 @@ module.exports = {
 
               datastore.updateQuery(challengeQuery, { consumed: 1 })
 
-              const Sdk = await getSdkByClient(client_id.client_id)
+              const Sdk = await getSdkByClient(challengeData.client_id)
               const signInResult = await Sdk.payload.get(req.query.payload)
               const account = signInResult?.response?.account
               const password = crypto.createHash('sha256').update(account + config.secret).digest('hex')
