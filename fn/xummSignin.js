@@ -35,7 +35,7 @@ module.exports = {
       const payload = await Sdk.payload.create({
         options: {
           return_url: {
-            // TODO: render app / web return URL based on origin
+            app: config.openid.discovery.issuer + '/signin?t=' + token + '&h=' + hash + '&c=' + req.query.client_id + '&payload={id}',
             web: config.openid.discovery.issuer + '/signin?t=' + token + '&h=' + hash + '&c=' + req.query.client_id + '&payload={id}'
           }
         },
