@@ -3,7 +3,7 @@ module.exports = function redirectUriCheck (dbresult, uri) {
     if (Array.isArray(dbresult[0]) && dbresult[0].length > 0) {
       if (dbresult[0][0]?.['redirect-url']) {
         const uris = dbresult[0][0]?.['redirect-url'].trim().split("\n")
-          .filter(u => u.match(/^https:/))
+          .filter(u => u.match(/^[a-z]{1,}[a-z0-9]{1,}:\//))
         
         console.log({uris, uri})
 
