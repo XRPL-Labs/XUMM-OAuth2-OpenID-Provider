@@ -54,4 +54,6 @@ SELECT
     'XUMMAPI' as `signin-method`
 FROM
     `xrpllabs_sp`.`applications`
+WHERE
+    `application_disabled` = 0
 ```
