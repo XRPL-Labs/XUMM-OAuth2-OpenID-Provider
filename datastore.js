@@ -11,7 +11,8 @@ class DatastoreQuery {
   m_filter = []
 
   constructor (dataset) {
-    console.log('new dataset', dataset)
+    // DEBUG
+    // console.log('new dataset', dataset)
     this.m_dataset = dataset
   }
 
@@ -96,13 +97,15 @@ class DatastoreQuery {
             return outcome
           }))).filter(r => r.safe)
 
-          console.log('users.match', result)
+          // DEBUG
+          // console.log('users.match', result)
           return result
         }
       }
     } else {
       const conn = await db.getConnection()
-      console.log('Use MySQL database @ ', this.m_dataset, this.m_filter)
+      // DEBUG
+      // console.log('Use MySQL database @ ', this.m_dataset, this.m_filter)
 
       const whereQuery = this.m_filter.map(f => {
         return '`' + f.key + '` ' + f.operator + ' ?'
@@ -142,7 +145,8 @@ class Datastore {
   async updateQuery (datstoreQuery, newData) {
     try {
       const queryResults = await datstoreQuery.update(newData)
-      console.log('updateQuery', newData, queryResults)
+      // DEBUG
+      // console.log('updateQuery', newData, queryResults)
       return true
     } catch (e) {
       console.log('error', e.message)

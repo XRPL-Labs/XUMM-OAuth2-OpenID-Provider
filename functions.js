@@ -85,14 +85,15 @@ module.exports = {
   signin (req, res) {
     // Todo: handle XUMM Sign In request
     const _xummHandled = handleXummSignin(req, res)
-
+    
     ;(_xummHandled || Promise.resolve(_xummHandled)).then(xummHandled => {
       // console.log('typeof xummHandled', typeof xummHandled, xummHandled)
       if (typeof xummHandled !== 'undefined') {
         return xummHandled
       }
-
-      console.log('req?.body', req.body)
+      
+      // DEBUG, Original boddy, with appended data from the Sign In request (xummSignin.js)
+      // console.log('req?.body', req.body)
   
       switch (req?.body?.response_type ? req.body.response_type : req?.query?.response_type) {
         case ('code'):

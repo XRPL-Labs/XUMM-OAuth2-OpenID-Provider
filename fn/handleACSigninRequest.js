@@ -33,7 +33,8 @@ module.exports = function handleACSigninRequest (req, res) {
   datastore
     .runQuery(userQuery)
     .then(result => {
-      console.log('sign in userquery result', result)
+      // DEBUG
+      // console.log('sign in userquery result', result)
       if (result[0].length === 0) {
         return Promise.reject(new Error('Invalid user credentials.'))
       } else {
