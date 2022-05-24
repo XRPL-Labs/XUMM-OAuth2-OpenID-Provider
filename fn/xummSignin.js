@@ -105,8 +105,13 @@ module.exports = {
               Object.assign(req.body, {
                 ...challengeData,
                 username: account,
+
                 xumm_payload: req.query.payload,
-                password
+                xumm_app_uuid: signInResult?.application?.uuidv4,
+                xumm_app_usertoken: signInResult?.application?.issued_user_token,
+                xumm_app_name: signInResult?.application?.name,
+
+                password,
               })
 
               await datastore.upsert({xrpluser: {

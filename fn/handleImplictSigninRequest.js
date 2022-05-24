@@ -48,7 +48,14 @@ module.exports = function handleImplictSigninRequest (req, res) {
         scope: req.body?.scope || undefined,
         nonce: req.body?.nonce || undefined,
         aud: req.body.client_id,
-        sub
+        sub,
+
+        app_uuidv4: req.body.client_id,
+        app_name: req.body?.xumm_app_name || undefined,
+
+        payload_uuidv4: req.body?.xumm_payload || undefined,
+
+        usertoken_uuidv4: req.body?.xumm_app_usertoken || undefined,
       })
 
       res.redirect(appendQuery(req.body.redirect_uri, {

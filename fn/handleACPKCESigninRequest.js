@@ -68,6 +68,10 @@ module.exports = function handleACPKCESigninRequest (req, res) {
         nonce: req.body?.nonce || undefined,
         scope: req.body?.scope || undefined,
         sub,
+
+        xumm_payload: req.body?.xumm_payload || undefined,
+        xumm_app_usertoken: req.body?.xumm_app_usertoken || undefined,
+        xumm_app_name: req.body?.xumm_app_name || undefined, // TODO: Redundant, can be fetched from API or at Client level (view)
       };
 
       return Promise.all([

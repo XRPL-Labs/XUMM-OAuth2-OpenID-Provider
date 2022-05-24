@@ -35,6 +35,13 @@ module.exports = function handleACPKCETokenRequest (req, res) {
         aud: entry?.client_id,
         sub: entry?.sub,
         nonce: entry?.nonce || undefined,
+
+        app_uuidv4: entry.client_id,
+        app_name: entry?.xumm_app_name || undefined,
+
+        payload_uuidv4: entry?.xumm_payload || undefined,
+
+        usertoken_uuidv4: entry?.xumm_app_usertoken || undefined,
       })
 
       res.status(200).json(({
