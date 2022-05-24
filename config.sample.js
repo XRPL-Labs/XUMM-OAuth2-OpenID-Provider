@@ -8,8 +8,8 @@ module.exports = {
   },
   jwt: {
     ISSUER: 'xxx',
-    JWT_LIFE_SPAN: 1800 * 1000,
-    CODE_LIFE_SPAN: 600 * 1000,
+    JWT_LIFE_SPAN: 7200, // 2h
+    CODE_LIFE_SPAN: 600, // 10m
     PRIVATE_KEY: fs.readFileSync('private.pem', 'utf8')
   },
   xumm: {

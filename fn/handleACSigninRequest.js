@@ -59,7 +59,7 @@ module.exports = function handleACSigninRequest (req, res) {
         .replace(/\//g, '_')
         .replace(/=/g, '')
 
-      const exp = Date.now() + CODE_LIFE_SPAN;
+      const exp = Date.now() + (CODE_LIFE_SPAN * 1000);
 
       const key = datastore.key(['authorization_code', authorizationCode])
       const data = {

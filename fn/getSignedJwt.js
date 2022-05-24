@@ -12,6 +12,6 @@ module.exports = function getSignedJWt (jwtData) {
   return {
     access_token: token,
     token_type: 'bearer',
-    expires_in: JWT_LIFE_SPAN / 1000,
+    expires_in: JWT_LIFE_SPAN,
   }
 }

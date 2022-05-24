@@ -56,7 +56,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
         .replace(/\//g, '_')
         .replace(/=/g, '')
 
-      const exp = Date.now() + CODE_LIFE_SPAN;
+      const exp = Date.now() + (CODE_LIFE_SPAN * 1000);
 
       const codeKey = datastore.key(['authorization_code', authorizationCode])
       const data = {
