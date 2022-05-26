@@ -13,8 +13,14 @@ module.exports = function handleACPKCETokenRequest (req, res) {
   const clientQuery = datastore
     .createQuery('client')
     .filter('client-id', '=', req.body.client_id)
-    .filter('client-secret', '=', req.body.client_secret)
     .filter('acpkce-enabled', '=', true)
+
+  if (req.body?.code_verifier && !req.body.client_secret) {
+    // Client side implicit PKCE request
+    clientQuery.filter('implicit-enabled', '=', true)
+  } else {
+    clientQuery.filter('client-secret', '=', req.body.client_secret)
+  }
 
   datastore
     .runQuery(clientQuery)
