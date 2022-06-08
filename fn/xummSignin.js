@@ -1,4 +1,5 @@
 const config = require('../config')
+const appendQuery = require('append-query')
 const returnError = require('./returnError')
 const {XummSdk} = require('xumm-sdk')
 const {datastore} = require('../datastore')
@@ -98,12 +99,11 @@ module.exports = {
               const password = crypto.createHash('sha256').update(account + config.secret).digest('hex')
 
               if (!signInResult?.meta?.signed || !account) {
-                // TODO: Check scope, if challengeData.scope.toLowerCase() === 'xummpkce' » JS redirect
-                if ((challengeData?.scope || '').toLowerCase() === 'xummpkce') {
-                  const errData = {
-                    error: 'access_denied',
-                    error_description: 'The XUMM sign in request has been rejected'
-                  }
+                const errData = {
+                  error: 'access_denied',
+                  error_description: 'The XUMM sign in request has been rejected'
+                }
+              if ((challengeData?.scope || '').toLowerCase() === 'xummpkce') {
                   return renderPkceRedirect(req, res, {
                     redirect_uri: challengeData.redirect_uri,
                     full_redirect_uri: appendQuery(challengeData.redirect_uri, errData),
