@@ -6,18 +6,8 @@ module.exports = async function renderPkceRedirect (req, res, options) {
     <br /><br />
     Return URL: ${options?.redirect_uri}
 
-    <script>
-      var options = ${JSON.stringify(options)};
-      if (window.opener) {
-        if (typeof options.authorization_code === 'string') {
-          console.log('Accepted', options)
-        } else {
-          console.log('Rejected', options)
-        }
-      } else {
-        console.log('Origin window gone?', options?.full_redirect_uri)
-      }
-    </script>
+    <textarea id="pkce_options" style="display: none;">${encodeURIComponent(JSON.stringify(options))}</textarea>
+    <script src="/assets/xumm-pkce.js"></script>
   `.trim()
 
   res.status(200).send(html)
