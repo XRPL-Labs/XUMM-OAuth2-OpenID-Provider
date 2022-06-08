@@ -85,6 +85,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
         code: results[1],
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
+        rf: 2,
       }))
     })
 }
