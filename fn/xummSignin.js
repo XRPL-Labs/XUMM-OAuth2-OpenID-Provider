@@ -100,11 +100,17 @@ module.exports = {
               if (!signInResult?.meta?.signed || !account) {
                 // TODO: Check scope, if challengeData.scope.toLowerCase() === 'xummpkce' » JS redirect
                 if ((challengeData?.scope || '').toLowerCase() === 'xummpkce') {
+                  const errData = {
+                    error: 'access_denied',
+                    error_description: 'The XUMM sign in request has been rejected'
+                  }
                   return renderPkceRedirect(req, res, {
-                    redirect_uri: challengeData.redirect_uri
+                    redirect_uri: challengeData.redirect_uri,
+                    full_redirect_uri: appendQuery(challengeData.redirect_uri, errData),
+                    ...errData
                   })
                 }
-                return !!oauthErrorRedirect(res, challengeData.redirect_uri, 'access_denied', 'The XUMM sign in request has been rejected')
+                return !!oauthErrorRedirect(res, challengeData.redirect_uri, errData.error, errData.error_description)
               }
 
               console.log('Signed SDK result from: ', req.query.payload, account)

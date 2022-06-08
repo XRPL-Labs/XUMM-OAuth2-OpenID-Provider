@@ -81,17 +81,23 @@ module.exports = function handleACPKCESigninRequest (req, res) {
       ])
     })
     .then(results => {
-      if ((req.body?.scope || '').toLowerCase() === 'xummpkce') {
-        return renderPkceRedirect(req, res, {
-          redirect_uri: req.body.redirect_uri
-        })
-      }
-
-      res.redirect(appendQuery(req.body.redirect_uri, {
+      const responseParams = {
         authorization_code: results[1],
         code: results[1],
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
-      }))
+      }
+
+      const fullUrl = appendQuery(req.body.redirect_uri, responseParams)
+
+      if ((req.body?.scope || '').toLowerCase() === 'xummpkce') {
+        return renderPkceRedirect(req, res, {
+          redirect_uri: req.body.redirect_uri,
+          full_redirect_uri: fullUrl,
+          ...responseParams
+        })
+      }
+
+      res.redirect(fullUrl)
     })
 }
