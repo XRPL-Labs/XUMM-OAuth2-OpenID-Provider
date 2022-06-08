@@ -11,5 +11,5 @@ const appendQuery = require('append-query')
 //  - temporarily_unavailable
 
 module.exports = function oauthErrorRedirect (res, return_url, error_code, error_description) {
-  return res.redirect(appendQuery(return_url, {error: error_code, error_description, rf: 1}))
+  return res.redirect(appendQuery(return_url, {error: error_code, error_description}))
 }

@@ -4,6 +4,7 @@ const {XummSdk} = require('xumm-sdk')
 const {datastore} = require('../datastore')
 const crypto = require("crypto")
 const oauthErrorRedirect = require('./oauthErrorRedirect')
+const renderPkceRedirect = require('./renderPkceRedirect')
 
 const genHash = function genHash (client, token) {
   const _token = token || crypto.randomBytes(12).toString('hex')
@@ -97,6 +98,12 @@ module.exports = {
               const password = crypto.createHash('sha256').update(account + config.secret).digest('hex')
 
               if (!signInResult?.meta?.signed || !account) {
+                // TODO: Check scope, if challengeData.scope.toLowerCase() === 'xummpkce' » JS redirect
+                if ((challengeData?.scope || '').toLowerCase() === 'xummpkce') {
+                  return renderPkceRedirect(req, res, {
+                    redirect_uri: challengeData.redirect_uri
+                  })
+                }
                 return !!oauthErrorRedirect(res, challengeData.redirect_uri, 'access_denied', 'The XUMM sign in request has been rejected')
               }
 

@@ -4,6 +4,7 @@ const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 const fernet = require('fernet')
 const redirectUriCheck = require('./redirectUriCheck')
+const renderPkceRedirect = require('./renderPkceRedirect')
 
 const {CODE_LIFE_SPAN} = config.jwt
 const fernetToken = new fernet.Token({ secret: new fernet.Secret(config.secret) })
@@ -80,12 +81,17 @@ module.exports = function handleACPKCESigninRequest (req, res) {
       ])
     })
     .then(results => {
+      if ((req.body?.scope || '').toLowerCase() === 'xummpkce') {
+        return renderPkceRedirect(req, res, {
+          redirect_uri: req.body.redirect_uri
+        })
+      }
+
       res.redirect(appendQuery(req.body.redirect_uri, {
         authorization_code: results[1],
         code: results[1],
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
-        rf: 2,
       }))
     })
 }
