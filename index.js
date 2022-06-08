@@ -24,6 +24,12 @@ app.use(helmet.contentSecurityPolicy({
 app.use(express.json())
 
 app.use((req, res, next) => {
+  if ('OPTIONS' === req.method) {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.sendStatus(200)
+    return res.end('')
+  }
+
   let backendProbability = 0
   const amountOfUsableHeaders = Object.keys(req.headers).filter(k => k.slice(0, 3).toLowerCase() !== 'cf-' && k.slice(0, 2).toLowerCase() !== 'x-').length
 
