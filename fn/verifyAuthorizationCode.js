@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const sanitizeRedirectUri = require('./sanitizeRedirectUri')
 const {datastore} = require('../datastore')
 
 module.exports = function verifyAuthorizationCode (authorizationCode, clientId, redirectUrl, codeVerifier = undefined) {
@@ -20,7 +21,7 @@ module.exports = function verifyAuthorizationCode (authorizationCode, clientId, 
         return Promise.reject(new Error('Client ID does not match the record.'))
       }
 
-      if (entry.redirect_url !== redirectUrl) {
+      if (sanitizeRedirectUri(entry.redirect_url) !== sanitizeRedirectUri(redirectUrl)) {
         return Promise.reject(new Error('Redirect URL does not match the record.'))
       }
 

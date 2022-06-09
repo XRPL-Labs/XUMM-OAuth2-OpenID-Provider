@@ -1,8 +1,4 @@
-const sanitizeRedirectUri = url => {
-  return url
-    .replace(/^([a-z0-9]+:\/\/[^?#]+)[?#]*.*/, '$1')
-    .replace(/\/+$/, '')
-}
+const sanitizeRedirectUri = require('./sanitizeRedirectUri')
 
 module.exports = function redirectUriCheck(dbresult, uri) {
   if (Array.isArray(dbresult) && dbresult.length > 0) {
