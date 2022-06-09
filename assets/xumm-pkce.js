@@ -1,4 +1,6 @@
 var pkce_options = document.getElementById('pkce_options')
+var target_uri = document.querySelector('script[target_uri]').getAttribute('target_uri')
+
 if (pkce_options) {
   try {
     var options = JSON.parse(decodeURIComponent(pkce_options.innerText))
@@ -8,7 +10,7 @@ if (pkce_options) {
         window.opener.postMessage(JSON.stringify({
           source: 'xumm_sign_request_resolved',
           options: options
-        }), '*')
+        }), target_uri)
         setTimeout(function () {
           window.close()
         }, 1)
@@ -17,7 +19,7 @@ if (pkce_options) {
         window.opener.postMessage(JSON.stringify({
           source: 'xumm_sign_request_rejected',
           options: options
-        }), '*')
+        }), target_uri)
         setTimeout(function () {
           window.close()
         }, 1)

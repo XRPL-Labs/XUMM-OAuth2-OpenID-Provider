@@ -7,7 +7,7 @@ module.exports = async function renderPkceRedirect (req, res, options) {
     <!-- Return URL: ${options?.redirect_uri} -->
 
     <textarea id="pkce_options" style="display: none;">${encodeURIComponent(JSON.stringify(options))}</textarea>
-    <script src="/assets/xumm-pkce.js"></script>
+    <script target_uri="${options?.redirect_uri}" src="/assets/xumm-pkce.js"></script>
 
     <pre>Redirecting...</pre>
   `.trim()
