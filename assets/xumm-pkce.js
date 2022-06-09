@@ -30,16 +30,13 @@ if (pkce_options) {
     } else {
       console.log('Origin window gone?', options.full_redirect_uri)
       if (typeof options.full_redirect_uri === 'string') {
+        document.location.href = options.full_redirect_uri
         if (redirecting) {
           redirecting.style.display = 'none'
         }
         if (redirected) {
-          redirected.setAttribute('style', '')
           redirected.style.display = 'block'
         }
-        setTimeout(function () {
-          document.location.href = options.full_redirect_uri
-        }, 1)
       }
     }
   } catch (e) {
