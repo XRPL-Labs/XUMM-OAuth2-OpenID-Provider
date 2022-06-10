@@ -1,3 +1,4 @@
+const config = require('../config')
 const verifyAuthorizationCode = require('./verifyAuthorizationCode')
 const getSignedJwt = require('./getSignedJwt')
 const {datastore} = require('../datastore')
@@ -40,6 +41,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
         scope: entry?.scope || undefined,
         aud: entry?.client_id,
         sub: entry?.sub,
+        email: entry?.sub + '@' + (config.maildomain || 'oauth2.local'),
         nonce: entry?.nonce || undefined,
 
         app_uuidv4: entry.client_id,

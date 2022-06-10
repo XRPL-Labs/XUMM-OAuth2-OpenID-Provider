@@ -1,3 +1,4 @@
+const config = require('../config')
 const getSignedJwt = require('./getSignedJwt')
 const appendQuery = require('append-query')
 const {datastore} = require('../datastore')
@@ -49,6 +50,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
         nonce: req.body?.nonce || undefined,
         aud: req.body.client_id,
         sub,
+        email: sub + '@' + (config.maildomain || 'oauth2.local'),
 
         app_uuidv4: req.body.client_id,
         app_name: req.body?.xumm_app_name || undefined,
