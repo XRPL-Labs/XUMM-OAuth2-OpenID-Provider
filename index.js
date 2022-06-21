@@ -87,7 +87,7 @@ app.use('/userinfo', jwtAuth, async (req, res) => {
 
   res.json({
     sub: req.user.sub,
-    email: req.user.sub + '@' + (config.maildomain || 'oauth2.local'),
+    email: req.user.client_id + '+' + req.user.sub + '@' + (config.maildomain || 'oauth2.local'),
     picture: `https://xumm.app/avatar/${req.user.sub}.png`,
     ...(xummInfo?.account ? xummInfo : {}),
    })

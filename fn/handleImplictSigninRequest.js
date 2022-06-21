@@ -50,7 +50,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
         nonce: req.body?.nonce || undefined,
         aud: req.body.client_id,
         sub,
-        email: sub + '@' + (config.maildomain || 'oauth2.local'),
+        email: req.body.client_id + '+' + sub + '@' + (config.maildomain || 'oauth2.local'),
 
         app_uuidv4: req.body.client_id,
         app_name: req.body?.xumm_app_name || undefined,

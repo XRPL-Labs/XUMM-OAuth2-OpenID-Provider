@@ -35,7 +35,7 @@ module.exports = function handleACTokenRequest (req, res) {
         scope: entry?.scope || undefined,
         aud: entry?.client_id,
         sub: entry?.sub,
-        email: entry?.sub + '@' + (config.maildomain || 'oauth2.local'),
+        email: entry?.client_id + '+' + entry?.sub + '@' + (config.maildomain || 'oauth2.local'),
         nonce: entry?.nonce || undefined,
 
         app_uuidv4: entry.client_id,

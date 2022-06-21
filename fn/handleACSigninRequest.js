@@ -71,7 +71,7 @@ module.exports = function handleACSigninRequest (req, res) {
         nonce: req.body?.nonce || undefined,
         scope: req.body?.scope || undefined,
         sub,
-        email: sub + '@' + (config.maildomain || 'oauth2.local'),
+        email: req.body.client_id + '+' + sub + '@' + (config.maildomain || 'oauth2.local'),
 
         xumm_payload: req.body?.xumm_payload || undefined,
         xumm_app_usertoken: req.body?.xumm_app_usertoken || undefined,
