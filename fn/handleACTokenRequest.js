@@ -44,6 +44,9 @@ module.exports = function handleACTokenRequest (req, res) {
         payload_uuidv4: entry?.xumm_payload || undefined,
 
         usertoken_uuidv4: entry?.xumm_app_usertoken || undefined,
+
+        network_type: entry?.xumm_network_type || undefined,
+        network_endpoint: entry?.xumm_network_endpoint || undefined,
       })
       
       const jwtResponseData = {

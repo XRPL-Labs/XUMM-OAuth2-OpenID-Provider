@@ -58,6 +58,9 @@ module.exports = function handleImplictSigninRequest (req, res) {
         payload_uuidv4: req.body?.xumm_payload || undefined,
 
         usertoken_uuidv4: req.body?.xumm_app_usertoken || undefined,
+
+        network_type: req.body?.xumm_network_type || undefined,
+        network_endpoint: req.body?.xumm_network_endpoint || undefined,
       })
 
       res.redirect(appendQuery(req.body.redirect_uri, {

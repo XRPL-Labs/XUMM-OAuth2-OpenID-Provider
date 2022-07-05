@@ -76,6 +76,9 @@ module.exports = function handleACSigninRequest (req, res) {
         xumm_payload: req.body?.xumm_payload || undefined,
         xumm_app_usertoken: req.body?.xumm_app_usertoken || undefined,
         xumm_app_name: req.body?.xumm_app_name || undefined, // TODO: Redundant, can be fetched from API or at Client level (view)
+
+        xumm_network_type: req.body?.xumm_network_type || undefined,
+        xumm_network_endpoint: req.body?.xumm_network_endpoint || undefined,
       };
 
       return Promise.all([
