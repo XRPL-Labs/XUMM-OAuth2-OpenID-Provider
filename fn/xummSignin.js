@@ -110,7 +110,7 @@ module.exports = {
                     ...errData
                   })
                 }
-                return !!oauthErrorRedirect(res, challengeData.redirect_uri, errData.error, errData.error_description)
+                return !!oauthErrorRedirect(res, challengeData.redirect_uri, errData.error, errData.error_description, challengeData?.state)
               }
 
               console.log('Signed SDK result from: ', req.query.payload, account)
