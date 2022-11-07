@@ -12,7 +12,7 @@ module.exports = function redirectUriCheck(dbresult, uri) {
         
         console.log({uris, uri, sUri})
 
-        if (uris.filter(u => u === sUri).length > 0) {
+        if (uris.filter(u => u === sUri.slice(0, u.length)).length > 0) {
           return dbresult
         }
       }
