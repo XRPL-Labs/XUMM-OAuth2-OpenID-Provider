@@ -8,6 +8,13 @@ if (pkce_options) {
   try {
     var options = JSON.parse(decodeURIComponent(pkce_options.innerText))
     if (window.opener) {
+      window.onbeforeunload = function () {
+        console.log('Before Unload', options)
+        window.opener.postMessage(JSON.stringify({
+          source: 'xumm_sign_request_popup_closed',
+          options: options
+        }), target_uri)
+      }
       if (typeof options.authorization_code === 'string') {
         console.log('Accepted', options)
         window.opener.postMessage(JSON.stringify({
