@@ -68,6 +68,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
         refresh_token: '',
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
+        scope: req.body?.scope || undefined,
       }))
     })
 }
