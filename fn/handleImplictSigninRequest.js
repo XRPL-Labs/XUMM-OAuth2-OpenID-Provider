@@ -4,6 +4,7 @@ const appendQuery = require('append-query')
 const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 const redirectUriCheck = require('./redirectUriCheck')
+const renderPkceRedirect = require('./renderPkceRedirect')
 
 module.exports = function handleImplictSigninRequest (req, res) {
   console.log('handleImplictSigninRequest')
