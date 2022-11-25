@@ -16,7 +16,7 @@ if (pkce_options) {
         //   options: options
         // }), target_uri)
       }
-      if (typeof options.authorization_code === 'string') {
+      if (typeof options.authorization_code === 'string' || typeof options.access_token === 'string') {
         console.log('Accepted', options)
         window.opener.postMessage(JSON.stringify({
           source: 'xumm_sign_request_resolved',

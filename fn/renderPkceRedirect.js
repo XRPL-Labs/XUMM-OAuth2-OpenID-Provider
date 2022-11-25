@@ -11,7 +11,7 @@ module.exports = async function renderPkceRedirect (req, res, options) {
     <pre id="redirecting">Redirecting to Xumm...</pre>
     <pre id="redirected" style="display: none;">Redirected to Xumm...</pre>
 
-    <script target_uri="${options?.redirect_uri}" src="/assets/xumm-pkce.js?100"></script>
+    <script target_uri="${options?.redirect_uri}" src="/assets/xumm-pkce.js?101"></script>
     `.trim()
 
   res.status(200).send(html)

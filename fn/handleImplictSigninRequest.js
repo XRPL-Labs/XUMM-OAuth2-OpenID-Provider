@@ -63,12 +63,24 @@ module.exports = function handleImplictSigninRequest (req, res) {
         network_endpoint: req.body?.xumm_network_endpoint || undefined,
       })
 
-      res.redirect(appendQuery(req.body.redirect_uri, {
+      const responseParams = {
         ...token,
         refresh_token: '',
         state: req.body?.state || undefined,
         nonce: req.body?.nonce || undefined,
         scope: req.body?.scope || undefined,
-      }))
+      }
+
+      const fullUrl = appendQuery(req.body.redirect_uri, responseParams)
+
+      if ((req.body?.scope || '').toLowerCase() === 'xummpkce') {
+        return renderPkceRedirect(req, res, {
+          redirect_uri: req.body.redirect_uri,
+          full_redirect_uri: fullUrl,
+          ...responseParams
+        })
+      }
+
+      res.redirect(fullUrl)
     })
 }
