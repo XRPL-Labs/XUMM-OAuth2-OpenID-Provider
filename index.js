@@ -80,15 +80,15 @@ const jwtAuth = (req, res, next) => {
   })
 }
 
-app.use('/certs', async (req, res) => {
+app.use('(/oauth)?/certs', async (req, res) => {
   res.json({keys: config.openid.certs})
 })
 
-app.use('/.well-known/openid-configuration', async (req, res) => {
+app.use('(/oauth)?/.well-known/openid-configuration', async (req, res) => {
   res.json(config.openid.discovery)
 })
 
-app.use('/userinfo', jwtAuth, async (req, res) => {
+app.use('(/oauth)?/userinfo', jwtAuth, async (req, res) => {
   const xummInfoCall = await fetch('https://xumm.app/api/v1/app/account-info/' + req.user.sub)
   const xummInfo = await xummInfoCall.json()
 
@@ -102,11 +102,11 @@ app.use('/userinfo', jwtAuth, async (req, res) => {
    })
 })
 
-app.use('/auth(orize)?', auth)
-app.use('/signin', signin)
-app.use('/token', token)
+app.use('(/oauth)?/auth(orize)?', auth)
+app.use('(/oauth)?/signin', signin)
+app.use('(/oauth)?/token', token)
 
-app.use('/assets', express.static('./assets'))
+app.use('(/oauth)?/assets', express.static('./assets'))
 
 app.listen(config.port, () => {
   console.log(`Service listening at :${config.port}`)
