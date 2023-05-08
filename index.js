@@ -4,6 +4,7 @@ const {ISSUER, PRIVATE_KEY} = config.jwt
 const returnError = require('./fn/returnError')
 const {auth, signin, token} = require('./functions')
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args))
+const cors = require('cors')
 
 const express = require('express')
 const helmet = require('helmet')
@@ -11,6 +12,9 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 
 const app = express()
+
+app.options('*', cors())
+
 app.use(helmet.contentSecurityPolicy({
   directives: {
     formAction: null,
@@ -21,6 +25,7 @@ app.use(helmet.contentSecurityPolicy({
     styleSrc: [ "'self'", "https://xumm.app", "'unsafe-inline'", "https://fonts.googleapis.com", "https://stackpath.bootstrapcdn.com", "https://kit.fontawesome.com", "https://use.typekit.net", "https://p.typekit.net", "https://*.fontawesome.com" ],
   },
 }))
+
 app.use(express.json())
 
 app.use((req, res, next) => {
