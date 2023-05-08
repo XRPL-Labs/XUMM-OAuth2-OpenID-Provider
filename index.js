@@ -13,7 +13,7 @@ const bodyParser = require('body-parser')
 
 const app = express()
 
-app.options('*', cors())
+app.use(cors({}))
 
 app.use(helmet.contentSecurityPolicy({
   directives: {
