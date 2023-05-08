@@ -97,7 +97,7 @@ app.use('/userinfo', jwtAuth, async (req, res) => {
    })
 })
 
-app.use('/auth', auth)
+app.use('/auth(orize)?', auth)
 app.use('/signin', signin)
 app.use('/token', token)
 
