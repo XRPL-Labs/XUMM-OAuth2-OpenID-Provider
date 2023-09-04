@@ -53,6 +53,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
 
         network_type: entry?.xumm_network_type || undefined,
         network_endpoint: entry?.xumm_network_endpoint || undefined,
+        network_id: entry?.xumm_network_id || undefined,
       })
 
       res.status(200).json(({

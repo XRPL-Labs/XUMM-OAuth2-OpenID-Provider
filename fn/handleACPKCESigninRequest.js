@@ -77,6 +77,7 @@ module.exports = function handleACPKCESigninRequest (req, res) {
 
         xumm_network_type: req.body?.xumm_network_type || undefined,
         xumm_network_endpoint: req.body?.xumm_network_endpoint || undefined,
+        xumm_network_id: req.body?.xumm_network_id || undefined,
       };
 
       return Promise.all([

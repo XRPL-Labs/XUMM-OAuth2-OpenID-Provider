@@ -99,6 +99,7 @@ app.use('(/oauth)?/userinfo', jwtAuth, async (req, res) => {
     ...(xummInfo?.account ? xummInfo : {}),
     networkType: req.user?.network_type,
     networkEndpoint: req.user?.network_endpoint,
+    networkId: req.user?.network_id,
    })
 })
 

@@ -126,6 +126,7 @@ module.exports = {
 
                 xumm_network_type: signInResult?.response?.environment_nodetype,
                 xumm_network_endpoint: signInResult?.response?.environment_nodeuri,
+                xumm_network_id: signInResult?.response?.environment_networkid,
 
                 password,
               })

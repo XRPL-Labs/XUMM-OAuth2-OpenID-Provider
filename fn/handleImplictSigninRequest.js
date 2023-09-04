@@ -62,6 +62,7 @@ module.exports = function handleImplictSigninRequest (req, res) {
 
         network_type: req.body?.xumm_network_type || undefined,
         network_endpoint: req.body?.xumm_network_endpoint || undefined,
+        network_id: req.body?.xumm_network_id || undefined,
       })
 
       const responseParams = {
