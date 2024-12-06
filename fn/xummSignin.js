@@ -34,8 +34,13 @@ module.exports = {
       const Sdk = await getSdkByClient(req.query.client_id)
       const {token, hash} = genHash(req.query.client_id)
 
+      const force_network = String(req.query?.force_network || '').trim().toUpperCase()
+      const signers = String(req.query?.signers || '').trim()
+
       const payload = await Sdk.payload.create({
         options: {
+          force_network: force_network.match(/^[A-Z]+$/) ? force_network : undefined,
+          signers: signers.match(/^r[a-zA-Z0-9]{10,}/) ? signers.split(',').map(s => s.trim()) : undefined,
           return_url: {
             app: config.openid.discovery.issuer + '/signin?t=' + token + '&h=' + hash + '&c=' + req.query.client_id + '&payload={id}',
             web: config.openid.discovery.issuer + '/signin?t=' + token + '&h=' + hash + '&c=' + req.query.client_id + '&payload={id}'
