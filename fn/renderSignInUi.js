@@ -32,7 +32,7 @@ module.exports = async function renderSignInUi (req, res, options) {
     try {
       return initiateXummSignin(req, res)
     } catch (e) {
-      return returnError(req, res, 'xumm_api_catch', e.message, 503, {})
+      return returnError(req, res, 'xaman_api_catch', e.message, 503, {})
     }
   }
 

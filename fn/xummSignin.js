@@ -64,10 +64,14 @@ module.exports = {
         return res.redirect(payload.next.always)
       }
     } catch (e) {
-      return returnError(req, res, 'xumm_api_err', e.message, 503, {})
+      return returnError(req, res, 'xaman_api_err', e.message, 503, {})
     }
 
-    return returnError(req, res, 'xumm_api_final_err', 'Error communicating to the XUMM API', 500, {})
+    let additionalMessage = ''
+    if (e?.message) {
+      additionalMessage = ': ' + e.message
+    }
+    return returnError(req, res, 'xaman_api_final_err', 'Error communicating to the Xaman API' + additionalMessage, 500, {})
   },
   handleXummSignin: async function handleXummSignin (req, res) {
     try {
@@ -147,11 +151,11 @@ module.exports = {
               return
             }
           } else {
-            return returnError(req, res, 'xumm_signin_sec_vil', 'XUMM Sign In: security violation', 403, {})
+            return returnError(req, res, 'xaman_signin_sec_vil', 'Xaman Sign In: security violation', 403, {})
           }
         }
 
-        return returnError(req, res, 'xumm_signin_redir_err', 'Could not resolve XUMM Sign In details', 500, {})
+        return returnError(req, res, 'xaman_signin_redir_err', 'Could not resolve Xaman Sign In details', 500, {})
       }
       
       return
