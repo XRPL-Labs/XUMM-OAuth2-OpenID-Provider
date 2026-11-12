@@ -43,7 +43,7 @@ module.exports = {
     const b64auth = ((req.headers?.authorization || '').trim() || '').split(' ').reverse()[0] || ''
     const strauth = Buffer.from(b64auth, 'base64').toString()
     const splitIndex = strauth.indexOf(':')
-    console.log({b64auth, strauth, splitIndex})
+    // Not logged: the Basic auth value is the client id and the client SECRET
 
     let login
     let password
@@ -88,7 +88,9 @@ module.exports = {
     
     ;(_xummHandled || Promise.resolve(_xummHandled)).then(xummHandled => {
       // console.log('typeof xummHandled', typeof xummHandled, xummHandled)
-      if (typeof xummHandled !== 'undefined') {
+      // Also when the Xaman sign in step already answered (error page, PKCE return page): the code below answered
+      // a second time ('Cannot set headers after they are sent', 23,878 times in the error log)
+      if (typeof xummHandled !== 'undefined' || res.headersSent) {
         return xummHandled
       }
       

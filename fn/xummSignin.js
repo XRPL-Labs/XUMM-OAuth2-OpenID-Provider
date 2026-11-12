@@ -67,11 +67,9 @@ module.exports = {
       return returnError(req, res, 'xaman_api_err', e.message, 503, {})
     }
 
-    let additionalMessage = ''
-    if (e?.message) {
-      additionalMessage = ': ' + e.message
-    }
-    return returnError(req, res, 'xaman_api_final_err', 'Error communicating to the Xaman API' + additionalMessage, 500, {})
+    // No payload and no error (the Xaman API refused: application disabled, rate limit, ...). This read `e`, which
+    // does not exist here: a ReferenceError, no response, the request stayed open (24,733 times in the error log).
+    return returnError(req, res, 'xaman_api_final_err', 'Error communicating to the Xaman API', 500, {})
   },
   handleXummSignin: async function handleXummSignin (req, res) {
     try {

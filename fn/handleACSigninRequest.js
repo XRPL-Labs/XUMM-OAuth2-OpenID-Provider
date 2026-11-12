@@ -15,7 +15,7 @@ module.exports = function handleACSigninRequest (req, res) {
     return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
-  console.log('acrequest', req.body)
+  // Not logged: the body has the user name and password
 
   const userQuery = datastore
     .createQuery('user')

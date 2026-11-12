@@ -5,7 +5,8 @@ const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 
 module.exports = function handleACPKCETokenRequest (req, res) {
-  console.log('handleACPKCETokenRequest', req.body)
+  // The body is not logged: it has the authorization code and the code verifier (or the client secret)
+  console.log('handleACPKCETokenRequest', req.body?.client_id)
 
   if (req.body.client_id === undefined || (req.body.authorization_code === undefined && req.body.code === undefined) || req.body.redirect_uri === undefined || req.body.code_verifier === undefined) {
     return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
@@ -34,7 +35,7 @@ module.exports = function handleACPKCETokenRequest (req, res) {
       return verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri, req.body.code_verifier)
     })
     .then(entry => {
-      console.log('handleACPKCETokenRequest', {entry})
+      console.log('handleACPKCETokenRequest', { client_id: entry?.client_id, sub: entry?.sub })
       const token = getSignedJwt({
         client_id: entry?.client_id,
         // state: entry?.state || undefined,
