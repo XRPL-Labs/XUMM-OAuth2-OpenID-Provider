@@ -28,7 +28,7 @@ module.exports = function handleACTokenRequest (req, res) {
       return verifyAuthorizationCode(req.body?.authorization_code || req.body?.code, req.body.client_id, req.body.redirect_uri)
     })
     .then(entry => {
-      console.log('handleACTokenRequest', {entry})
+      console.log('handleACTokenRequest', { client_id: entry?.client_id, sub: entry?.sub })
       const token = getSignedJwt({
         client_id: entry?.client_id,
         // state: entry?.state || undefined,

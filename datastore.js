@@ -172,7 +172,8 @@ class Datastore {
   }
 
   async upsert (data) {
-    console.log('upsert', data)
+    // The values are not logged (password hashes, codes): the table and the fields only
+    console.log('upsert', Object.keys(data || {}).map(k => k + ': ' + Object.keys(data[k] || {}).join(',')).join(' | '))
 
     const upsertData = {}
 
