@@ -89,8 +89,15 @@ app.use('(/oauth)?/.well-known/openid-configuration', async (req, res) => {
 })
 
 app.use('(/oauth)?/userinfo', jwtAuth, async (req, res) => {
-  const xummInfoCall = await fetch('https://xumm.app/api/v1/app/account-info/' + req.user.sub)
-  const xummInfo = await xummInfoCall.json()
+  // The account info is extra: without it (no JSON answer, time out) the user info is still answered. Before, an
+  // error here left the request without a response.
+  let xummInfo = {}
+  try {
+    const xummInfoCall = await fetch('https://xumm.app/api/v1/app/account-info/' + encodeURIComponent(String(req.user.sub)))
+    xummInfo = await xummInfoCall.json()
+  } catch (e) {
+    console.log('userinfo: no account info', e?.message)
+  }
 
   res.json({
     sub: req.user.sub,
