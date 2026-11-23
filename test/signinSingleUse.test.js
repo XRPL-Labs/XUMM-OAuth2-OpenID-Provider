@@ -39,11 +39,13 @@ let tables
 let consumedDefault = 0 // the value of `consumed` in a new challenge row (the suite runs with 0 and with NULL)
 let failUpsert = false
 let failQuery = false
+let failGrantRead = false
 
 const sqlEqual = (a, b) => a !== null && a !== undefined && b !== null && b !== undefined &&
   String(typeof a === 'boolean' ? Number(a) : a) === String(typeof b === 'boolean' ? Number(b) : b)
 const matches = (row, f) => {
   if (f.operator === '=') return sqlEqual(row[f.key], f.value)
+  if (f.operator === '>') return (row[f.key] ?? null) !== null && Number(row[f.key]) > Number(f.value)
   if (f.operator === '<=>') return (row[f.key] ?? null) === null || (f.value ?? null) === null ? (row[f.key] ?? null) === (f.value ?? null) : sqlEqual(row[f.key], f.value)
   throw new Error('fake datastore: operator ' + f.operator)
 }
@@ -72,6 +74,7 @@ class FakeQuery {
 
   async get () {
     await turn()
+    if (failGrantRead && this.dataset === 'grant') throw new Error('SQL text that must stay in the log')
     if (this.dataset === 'user') {
       const value = key => this.filters.filter(f => f.key === key).map(f => f.value)[0]
       return tables.user.filter(r => r.username === value('username')).filter(r => {
@@ -114,18 +117,6 @@ const datastore = {
     if (row.xrpl_account) return put('user', r => r.username === row.username, {})
     if (row.payload) return put('xumm_challenge', r => r.payload === row.payload, { consumed: consumedDefault })
     throw new Error('Error, unknown dataset to upsert to')
-  },
-  transaction () {
-    return {
-      async run () { return this },
-      async get (key) {
-        if (key?.authorization_code) return tables.grant.filter(r => r.authorization_code === key.authorization_code && r.fetched === 0)
-        throw new Error('Invalid dataset: transaction Get (key)')
-      },
-      async delete (key) { tables.grant.filter(r => r.authorization_code === key?.authorization_code).forEach(r => { r.fetched = 1 }) },
-      async commit () {},
-      async rollback () {}
-    }
   }
 }
 
@@ -642,16 +633,18 @@ const suite = async () => {
     eq(storeError.res.statusCode, 500)
     eq(storeError.res.value.error_description, 'Unexpected error')
 
-    // Token handlers: an unknown error gets an answer without its text
+    // Token handlers: an unknown error (the read of the code fails) gets an answer without its text
+    failGrantRead = true
     for (const body of [
-      { grant_type: 'authorization_code', client_id: CLIENT, code: '', redirect_uri: REDIRECT, code_verifier: 'v' },
-      { grant_type: 'authorization_code', client_id: CLIENT, code: '', redirect_uri: REDIRECT, client_secret: 'client-secret-1' }
+      { grant_type: 'authorization_code', client_id: CLIENT, code: 'a-code', redirect_uri: REDIRECT, code_verifier: 'v' },
+      { grant_type: 'authorization_code', client_id: CLIENT, code: 'a-code', redirect_uri: REDIRECT, client_secret: 'client-secret-1' }
     ]) {
       const { res } = await call(token, { method: 'POST', body, json: true })
       eq(res.statusCode, 500)
       eq(res.value.error, 'server_error')
       eq(res.value.error_description, 'Unexpected error')
     }
+    failGrantRead = false
     failQuery = true
     const queryError = await call(token, { method: 'POST', json: true, body: { grant_type: 'password', username: 'alice', password: 'alice-password', client_id: CLIENT, client_secret: 'client-secret-1' } })
     failQuery = false

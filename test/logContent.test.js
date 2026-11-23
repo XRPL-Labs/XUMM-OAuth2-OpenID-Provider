@@ -2,7 +2,7 @@
 //
 // What a log line has: the step, the ids of the client and the account, the text of an error. Not a code, a code
 // verifier, a token or the other claims of a token.
-// The real datastore.js (its transaction for the token step), fn/verifyAuthorizationCode.js and fn/jwtAuth.js, with a
+// The real datastore.js (its statements for the token step), fn/verifyAuthorizationCode.js and fn/jwtAuth.js, with a
 // fake config and a database pool that answers from a list. No config file, no database, no network.
 const assert = require('assert')
 const crypto = require('crypto')
@@ -35,20 +35,18 @@ let grants = []
 let failStatement = null
 const executed = []
 const connection = {
-  beginTransaction: async () => ({}),
-  execute: async (sql, params) => {
-    executed.push({ sql: sql.replace(/\s+/g, ' ').trim(), params })
+  execute: async (text, params) => {
+    const sql = text.replace(/\s+/g, ' ').trim()
+    executed.push({ sql, params })
     if (failStatement) throw failStatement
-    if (/^\s*SELECT \* FROM grants/.test(sql)) return [grants.filter(g => g.authorization_code === params[0] && g.fetched === 0), []]
-    if (/^\s*UPDATE grants SET fetched = 1/.test(sql)) {
-      const rows = grants.filter(g => g.authorization_code === params[0])
-      rows.forEach(g => { g.fetched = 1 })
+    if (sql === 'SELECT * FROM grants WHERE `authorization_code` = ? AND `fetched` = ?') return [grants.filter(g => g.authorization_code === params[0] && g.fetched === params[1]).map(g => ({ ...g })), []]
+    if (sql === 'UPDATE grants SET `fetched` = ? WHERE `authorization_code` = ? AND `fetched` = ? AND `exp` > ?') {
+      const rows = grants.filter(g => g.authorization_code === params[1] && g.fetched === params[2] && g.exp > params[3])
+      rows.forEach(g => { g.fetched = params[0] })
       return [{ affectedRows: rows.length }, undefined]
     }
     throw new Error('fake pool: statement ' + sql)
   },
-  commit: async () => {},
-  rollback: async () => {},
   release () {}
 }
 
@@ -66,7 +64,6 @@ console.log = (...args) => { logged.push(args.map(a => typeof a === 'string' ? a
 const text = () => logged.join('\n')
 const clear = () => { logged.length = 0; executed.length = 0 }
 
-const { datastore } = require('../datastore')
 const verifyAuthorizationCode = require('../fn/verifyAuthorizationCode')
 const jwtAuth = require('../fn/jwtAuth')
 
@@ -86,28 +83,8 @@ const clean = () => {
 const grant = (values = {}) => ({ authorization_code: CODE, client_id: CLIENT, redirect_url: REDIRECT, exp: Date.now() + 600 * 1000, code_challenge: CHALLENGE, sub: ACCOUNT, fetched: 0, ...values })
 
 const suite = async () => {
-  // 1. The transaction of the token step: the statements have the code, the log lines have the step only
-  {
-    clear()
-    grants = [grant()]
-    const transaction = datastore.transaction()
-    await transaction.run()
-    const rows = await transaction.get(datastore.key(['authorization_code', CODE]))
-    eq(rows.length, 1)
-    eq(rows[0].sub, ACCOUNT)
-    await transaction.delete(datastore.key(['authorization_code', CODE]))
-    await transaction.commit()
-    await settle()
-
-    eq(grants[0].fetched, 1, 'the code is used')
-    assert.deepStrictEqual(executed.map(e => e.params), [[CODE], [CODE]]); n++
-    ok(logged.includes('Transaction GET'), text())
-    ok(logged.includes('Transaction DELETE'), text())
-    ok(logged.includes('Transaction COMMIT'), text())
-    clean()
-  }
-
-  // 2. The token step with a good code and verifier: the entry, the code is used, nothing of it in the log
+  // 1. The token step with a good code and verifier: the entry, the code is used. The statements have the code as
+  // a value, the log has the step only
   {
     clear()
     grants = [grant()]
@@ -115,12 +92,31 @@ const suite = async () => {
     await settle()
     eq(entry.sub, ACCOUNT)
     eq(entry.client_id, CLIENT)
-    eq(grants[0].fetched, 1)
-    ok(logged.includes('Transaction GET') && logged.includes('Transaction DELETE') && logged.includes('Transaction COMMIT'), text())
+    eq(grants[0].fetched, 1, 'the code is used')
+    eq(executed.length, 2, 'one read, one update')
+    for (const e of executed) {
+      ok(!e.sql.includes(CODE), 'the code is not in the text of a statement')
+      ok(e.params.includes(CODE), 'the code is a value of the statement')
+    }
+    assert.deepStrictEqual(logged, ['verifyAuthorizationCode']); n++
     clean()
   }
 
-  // 3. Refused (as before, with the same error text for the client): the log has the reason, the code stays valid
+  // 2. Two requests with the code at the same moment: one gets the entry, the log line of the other has the ids of
+  // the client and the account
+  {
+    clear()
+    grants = [grant()]
+    const results = await Promise.allSettled([verifyAuthorizationCode(CODE, CLIENT, REDIRECT, VERIFIER), verifyAuthorizationCode(CODE, CLIENT, REDIRECT, VERIFIER)])
+    await settle()
+    eq(results.filter(r => r.status === 'fulfilled').length, 1)
+    eq(results.find(r => r.status === 'rejected').reason.message, 'Invalid authorization code.')
+    ok(logged.includes(`verifyAuthorizationCode: the code was used by another request at the same moment ${CLIENT} ${ACCOUNT}`), text())
+    ok(logged.includes('verifyAuthorizationCode error Invalid authorization code.'), text())
+    clean()
+  }
+
+  // 3. Refused (with the same error text for the client as before): the log has the reason
   for (const [args, reason] of [
     [['CODEMARK-unknown', CLIENT, REDIRECT, VERIFIER], 'Invalid authorization code.'],
     [[CODE, 'other-client', REDIRECT, VERIFIER], 'Client ID does not match the record.'],
@@ -131,10 +127,9 @@ const suite = async () => {
     grants = [grant()]
     await assert.rejects(verifyAuthorizationCode(...args), e => e.message === reason, reason); n++
     await settle()
-    eq(grants[0].fetched, 0, reason)
-    ok(logged.includes('verifyAuthorizationCode error ' + reason), text())
-    ok(logged.includes('Transaction ROLLBACK'), text())
-    ok(!logged.includes('Transaction DELETE'), text())
+    // A request that has the code and does not fit it uses the code: one attempt per code
+    eq(grants[0].fetched, args[0] === CODE ? 1 : 0, reason)
+    assert.deepStrictEqual(logged, ['verifyAuthorizationCode', 'verifyAuthorizationCode error ' + reason]); n++
     clean()
   }
   {
@@ -146,7 +141,8 @@ const suite = async () => {
     clean()
   }
 
-  // 4. A database error at the token step: the message is logged, not the other fields of the error
+  // 4. A database error at the token step: the message is logged, not the other fields of the error. The code is
+  // not used.
   {
     clear()
     grants = [grant()]
@@ -154,6 +150,7 @@ const suite = async () => {
     await assert.rejects(verifyAuthorizationCode(CODE, CLIENT, REDIRECT, VERIFIER), /Connection lost/); n++
     failStatement = null
     await settle()
+    eq(grants[0].fetched, 0)
     ok(logged.includes('verifyAuthorizationCode error Connection lost: The server closed the connection.'), text())
     clean()
   }

@@ -46,11 +46,12 @@ class DatastoreQuery {
 
     // console.log(query, params)
 
-    const results = await conn.execute(query, params)
-
-    conn.release()
-
-    return results
+    // The connection goes back to the pool also when the statement fails
+    try {
+      return await conn.execute(query, params)
+    } finally {
+      conn.release()
+    }
   }
 
   async get () {
@@ -117,8 +118,12 @@ class DatastoreQuery {
          WHERE ${whereQuery}
       `
 
-      const results = await conn.execute(query, this.m_filter.map(f => f.value))
-      conn.release()
+      let results
+      try {
+        results = await conn.execute(query, this.m_filter.map(f => f.value))
+      } finally {
+        conn.release()
+      }
 
       if (Array.isArray(results) && results.length > 0) {
         if (Array.isArray(results[0]) && results[0].length > 0) {
@@ -211,102 +216,6 @@ class Datastore {
     ])
 
     conn.release()
-  }
-
-  transaction () {
-    console.log('Start transaction')
-    return new DatastoreTransaction()
-  }
-}
-
-class DatastoreTransaction {
-  _mf_resolveConnection = null
-  _mf_resolveTransaction = null
-
-  m_connection = null
-  m_transaction = null
-
-  constructor () {
-    this.m_connection = new Promise(resolve => {
-      this._mf_resolveConnection = resolve
-    })
-    this.m_transaction = new Promise(resolve => {
-      this._mf_resolveTransaction = resolve
-    })
-  
-    db.getConnection().then(c => {
-      this._mf_resolveConnection(c)
-      console.log('Got connection')
-      c.beginTransaction().then(t => {
-        this._mf_resolveTransaction(t)
-        console.log('Got transaction')
-       })
-    })
-
-    return this
-  }
-
-  async run () {
-    console.log('Transaction RUN')
-
-    return this
-  }
-
-  async get (key) {
-    const c = await this.m_connection
-
-    if (key?.authorization_code) {
-      // The code is not logged
-      console.log('Transaction GET')
-      const data = await c.execute(`
-        SELECT * FROM grants
-        WHERE authorization_code = ?
-        AND fetched = 0
-        ORDER BY exp DESC LIMIT 1
-      `, [key?.authorization_code])
-
-      if (Array.isArray(data) && data.length > 0) {
-        return data[0]
-      }
-    }
-
-    throw new Error('Invalid dataset: transaction Get (key)')
-  }
-
-  async delete (key) {
-    const c = await this.m_connection
-
-    if (key?.authorization_code) {
-      console.log('Transaction DELETE')
-      const data = await c.execute(`
-        UPDATE grants SET fetched = 1 WHERE authorization_code = ?
-      `, [key?.authorization_code])
-    }
-
-    return this
-  }
-
-  async rollback () {
-    const c = await this.m_connection
-  
-    console.log('Transaction ROLLBACK')
-
-    c.rollback()
-    c.release()
-
-    return this
-  }
-
-  async commit () {
-    const c = await this.m_connection
-    const t = await this.m_transaction
-
-    console.log('Transaction COMMIT')
-
-    c.commit()
-    c.release()
-
-    return this
   }
 }
 
