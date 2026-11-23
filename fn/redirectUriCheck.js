@@ -86,6 +86,9 @@ const uriAllowed = (registered, requested) => {
 
 module.exports = function redirectUriCheck(dbresult, uri) {
   if (typeof uri !== 'string' || uri === '') return false
+  // A URI has no control characters (tab, line break, ...): a URL parser drops some of them, so the URI that is
+  // checked would not be the URI that is used
+  if (/[\u0000-\u001f\u007f]/.test(uri)) return false
   const registered = dbresult?.[0]?.[0]?.['redirect-url']
   if (typeof registered !== 'string') return false
 
