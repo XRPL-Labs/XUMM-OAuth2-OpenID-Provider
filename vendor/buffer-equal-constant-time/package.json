@@ -1,0 +1,8 @@
+{
+  "name": "buffer-equal-constant-time",
+  "version": "1.0.1-local.1",
+  "description": "Constant time comparison of two buffers, with the function of Node itself (the original package needs an API that newer Node versions do not have)",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true
+}
