@@ -114,6 +114,10 @@ module.exports = {
           returnError(req, res, 'invalid_request', 'Grant type is invalid or missing.', 400, {})
           break
       }
+    }).catch(e => {
+      // An error above that no handler answered: logged, and answered without its text
+      console.log('signin error', e?.message)
+      if (!res.headersSent) returnError(req, res, 'server_error', 'Unexpected error', 500, {})
     })
   }
 }

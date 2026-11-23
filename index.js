@@ -1,3 +1,6 @@
+// First: errors that no handler caught are logged from here on
+require('./fn/processErrors')()
+
 const jwt = require('jsonwebtoken')
 const config = require('./config')
 const {ISSUER, PRIVATE_KEY} = config.jwt
