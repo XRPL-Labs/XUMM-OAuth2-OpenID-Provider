@@ -6,6 +6,7 @@ const {datastore} = require('../datastore')
 const crypto = require("crypto")
 const oauthErrorRedirect = require('./oauthErrorRedirect')
 const renderPkceRedirect = require('./renderPkceRedirect')
+const signinInstruction = require('./signinInstruction')
 
 const genHash = function genHash (client, token) {
   const _token = token || crypto.randomBytes(12).toString('hex')
@@ -138,7 +139,7 @@ module.exports = {
           }
         },
         custom_meta: {
-          instruction: 'Sign in to ' + req.query.redirect_uri.replace(/^[a-z0-9]+:\/\//, '').split('/')[0]
+          instruction: signinInstruction(req.query.redirect_uri)
         },
         txjson: {
           TransactionType: 'SignIn'
