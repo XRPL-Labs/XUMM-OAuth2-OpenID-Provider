@@ -45,6 +45,8 @@ module.exports = function handleImplictSigninRequest (req, res) {
     })
     .then(() => {
       const token = getSignedJwt({
+        // A Xaman sign-in can give a token a few times in a short time: all have the issue time of the first
+        ...(req.xummSigninUsedAt ? { iat: Math.floor(req.xummSigninUsedAt / 1000) } : {}),
         client_id: req.body.client_id,
         state: req.body?.state || undefined,
         scope: req.body?.scope || undefined,
@@ -84,5 +86,15 @@ module.exports = function handleImplictSigninRequest (req, res) {
       }
 
       res.redirect(fullUrl)
+    })
+    .catch(e => {
+      // Every error gets an answer. A text of this flow goes to the caller, any other error (datastore, ...) is
+      // logged only.
+      console.log('error', e.message)
+      if (res.headersSent) return
+      if (e.message === 'Invalid user credentials.' || e.message === 'Invalid client and/or redirect URL.') {
+        return returnError(req, res, 'fatal', e.message, 400, {})
+      }
+      return returnError(req, res, 'server_error', 'Unexpected error', 500, {})
     })
 }

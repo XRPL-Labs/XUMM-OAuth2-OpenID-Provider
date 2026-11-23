@@ -57,7 +57,8 @@ module.exports = function handleACPKCESigninRequest (req, res) {
         .replace(/\//g, '_')
         .replace(/=/g, '')
 
-      const exp = Date.now() + (CODE_LIFE_SPAN * 1000);
+      // A Xaman sign-in can give a code a few times in a short time: all end when the first ends
+      const exp = (req.xummSigninUsedAt || Date.now()) + (CODE_LIFE_SPAN * 1000);
 
       const codeKey = datastore.key(['authorization_code', authorizationCode])
       const data = {
@@ -104,5 +105,15 @@ module.exports = function handleACPKCESigninRequest (req, res) {
       }
 
       res.redirect(fullUrl)
+    })
+    .catch(e => {
+      // Every error gets an answer. A text of this flow goes to the caller, any other error (datastore, ...) is
+      // logged only.
+      console.log('error', e.message)
+      if (res.headersSent) return
+      if (e.message === 'Invalid user credentials.' || e.message === 'Invalid client and/or redirect URL.') {
+        return returnError(req, res, 'fatal', e.message, 400, {})
+      }
+      return returnError(req, res, 'server_error', 'Unexpected error', 500, {})
     })
 }
