@@ -6,6 +6,7 @@ const assert = require('assert')
 const crypto = require('crypto')
 const Module = require('module')
 const path = require('path')
+const util = require('util')
 const jwt = require('jsonwebtoken')
 
 const CLIENT = '11111111-2222-4333-8444-555555555555'
@@ -98,6 +99,12 @@ const datastore = {
     if (failUpsert) throw new Error('SQL text that must stay in the log')
     const row = {}
     Object.keys(data).forEach(k => Object.assign(row, data[k]))
+    keepOutOfLog(row.authorization_code)
+    keepOutOfLog(row.password)
+    if (row.payload && typeof row.params === 'string') {
+      const { __t, state, nonce, code_challenge: challenge } = JSON.parse(row.params)
+      ;[__t, state, nonce, challenge].forEach(keepOutOfLog)
+    }
     const put = (table, same, defaults) => {
       const found = tables[table].find(same)
       if (found) return Object.assign(found, row)
@@ -166,7 +173,12 @@ Module._load = function (request) {
 }
 
 const realLog = console.log
-console.log = () => {} // the handlers log every step
+// The handlers log every step: the lines are kept, for the check of what a log line has (the end of the suite)
+const logged = []
+console.log = (...args) => { logged.push(args.map(a => typeof a === 'string' ? a : util.inspect(a, { depth: null, breakLength: Infinity })).join(' ')) }
+// Values that are in no log line: every code, flow token and value of the /auth request that the suite stores
+const notLogged = new Set(['client-secret-1', 'usertoken-1'])
+const keepOutOfLog = value => { if (typeof value === 'string' && value.length >= 6) notLogged.add(value) }
 const { auth, signin, token } = require('../functions')
 
 // The clock of this host, for the tests of the time between the first use and a later one
@@ -653,6 +665,18 @@ const suite = async () => {
 
   await new Promise(resolve => setTimeout(resolve, 20))
   eq(unhandled.length, 0, 'no unhandled rejection: ' + unhandled.map(e => e?.message).join(' | '))
+
+  // The log of all of the above. The return step has one line with the ids of the flow (client, sign request). No
+  // line has a code, a flow token, a token, a password value or a value of the /auth request (state, nonce, code
+  // challenge).
+  ok(logged.some(line => /^Sign in return 11111111-2222-4333-8444-555555555555 [0-9a-f-]{36}$/.test(line)), 'the return step is logged with its ids')
+  ok(notLogged.size > 20, 'values to look for: ' + notLogged.size)
+  for (const value of notLogged) {
+    const line = logged.find(l => l.includes(value))
+    eq(line, undefined, 'a stored value is in a log line: ' + String(line).slice(0, 80))
+  }
+  ok(!logged.some(line => /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\./.test(line)), 'no token in a log line')
+  ok(!logged.some(line => /challengeData|code_challenge|nonce/.test(line)), 'no value of the /auth request in a log line')
 }
 
 // The statements that take a use, as the real datastore.js builds them: ONE update per use, with the condition in

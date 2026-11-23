@@ -1,10 +1,8 @@
 // First: errors that no handler caught are logged from here on
 require('./fn/processErrors')()
 
-const jwt = require('jsonwebtoken')
 const config = require('./config')
-const {ISSUER, PRIVATE_KEY} = config.jwt
-const returnError = require('./fn/returnError')
+const jwtAuth = require('./fn/jwtAuth')
 const {auth, signin, token} = require('./functions')
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args))
 const cors = require('cors')
@@ -62,26 +60,6 @@ app.use((req, res, next) => {
 })
 
 app.use(bodyParser.urlencoded({ extended: false }))
-
-const jwtAuth = (req, res, next) => {
-  const authHeader = req.headers?.authorization
-  const token = authHeader && authHeader.trim().split(' ').reverse()[0].trim()
-
-  if (token == null) return returnError(req, res, 'invalid_jwt', 'No JWT token (auth) specified.', 401, {})
-
-  jwt.verify(token, PRIVATE_KEY, {
-    algorithms: ['RS256'],
-    issuer: ISSUER,
-  }, (err, user) => {
-    console.log({err: err ? err.message : false, user})
-
-    if (err) return returnError(req, res, 'jwt_auth_error', err?.message || 'Unspecified', 403, err)
-
-    req.user = user
-
-    next()
-  })
-}
 
 app.use('(/oauth)?/certs', async (req, res) => {
   res.json({keys: config.openid.certs})
