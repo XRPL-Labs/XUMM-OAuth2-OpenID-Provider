@@ -105,6 +105,18 @@ const no = [
   [['file:///C:/Users/dev/app/'], 'file:///C:/Users/other/'],
   [['myapp://callback'], 'myapp://callbackx'],
   [['myapp://callback'], 'otherapp://callback'],
+  // Control characters (tab, line break, ...) anywhere in the URI
+  [['https://xpmarket.com'], 'https://xpmarket.co?x\nm'],
+  [['https://xpmarket.com'], 'https://xpmarket.co#x\nm'],
+  [['https://xpmarket.com'], 'https://xpmarket.co?x\r\nm/cb'],
+  [['https://xpmarket.com'], 'https://xpmarket.co?\rm'],
+  [['https://xpmarket.com/cb'], 'https://xpmarket.co?\nm/cb'],
+  [['https://xpmarket.com'], 'https://xpmar\nket.com'],
+  [['https://xpmarket.com'], 'https://xpmarket.co\tm/cb'],
+  [['https://xpmarket.com'], 'https://xpmarket.com/cb?x=1\ny'],
+  [['https://xpmarket.com'], 'https://xpmarket.com/cb\u0000'],
+  [['https://xpmarket.com'], '\thttps://xpmarket.com/cb'],
+  [['myapp://'], 'myapp://call\nback'],
   [['https://xpmarket.com'], ''],
   [['https://xpmarket.com'], 'not a url'],
   [[''], 'https://xpmarket.com'],
@@ -112,10 +124,15 @@ const no = [
 let n = 0
 yes.forEach(([urls, uri]) => { assert.strictEqual(allowed(urls, uri), true, `must be ALLOWED: ${JSON.stringify(urls)} <- ${uri}`); n++ })
 no.forEach(([urls, uri]) => { assert.strictEqual(allowed(urls, uri), false, `must be REFUSED: ${JSON.stringify(urls)} <- ${uri}`); n++ })
+// The part that is compared ends at the first `?` or `#`, also when a line break follows
+const sanitize = require('../fn/sanitizeRedirectUri')
+assert.strictEqual(sanitize('https://a.io/cb?x=1\ny#z'), 'https://a.io/cb')
+assert.strictEqual(sanitize('https://a.io#x\r\ny'), 'https://a.io')
+assert.strictEqual(sanitize('https://a.io/cb/'), 'https://a.io/cb')
 assert.strictEqual(check(undefined, 'https://a.io'), false)
 assert.strictEqual(check([[]], 'https://a.io'), false)
 assert.strictEqual(check(reg(['https://a.io']), undefined), false)
 assert.strictEqual(check(reg(['https://a.io']), ['https://a.io']), false)
 const result = reg(['https://a.io'])
 assert.strictEqual(check(result, 'https://a.io/x'), result) // returns the db result, as before
-console.log('redirectUriCheck:', n + 5, 'checks OK')
+console.log('redirectUriCheck:', n + 8, 'checks OK')
