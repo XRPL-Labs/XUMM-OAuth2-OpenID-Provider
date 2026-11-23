@@ -6,7 +6,8 @@ const redirectUriCheck = require('./redirectUriCheck')
 module.exports = function handleImplicitAuthRequest (req, res) {
   console.log('handleImplicitAuthRequest')
 
-  if (req.query.client_id === undefined || req.query.redirect_uri === undefined) {
+  // Every value is one string (a parameter that is given twice is a list)
+  if (typeof req.query.client_id !== 'string' || typeof req.query.redirect_uri !== 'string') {
     return returnError(req, res, 'invalid_request', 'Required parameters are missing in the request.', 400, {})
   }
 
@@ -24,13 +25,16 @@ module.exports = function handleImplicitAuthRequest (req, res) {
       }
     })
     .then(() => {
-      renderSignInUi(req, res, {response_type: 'token'})
+      // Returned: an error of the sign-in start comes to the catch below
+      return renderSignInUi(req, res, {response_type: 'token'})
     })
     .catch(error => {
-      if (error.message === 'Invalid client/redirect URL.') {
+      if (error?.message === 'Invalid client/redirect URL.') {
         returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
-        throw error
+        // Any other error (datastore, page, ...): logged, and answered without its text
+        console.log('handleImplicitAuthRequest error', error?.message)
+        if (!res.headersSent) returnError(req, res, 'server_error', 'Unexpected error', 500, {})
       }
     })
 }

@@ -3,6 +3,7 @@ const pug = require('pug')
 const {datastore} = require('../datastore')
 const returnError = require('./returnError')
 const {initiateXummSignin} = require('./xummSignin')
+const {authStartLimit, callerAddress} = require('./authStartLimit')
 
 async function getClientDetails (client_id) {
   try {
@@ -29,6 +30,16 @@ module.exports = async function renderSignInUi (req, res, options) {
   // console.log('signin-method', clientDetails, clientDetails['signin-method'])
 
   if (clientDetails['signin-method'] === 'XUMMAPI') {
+    // The limit on sign-in starts, after all checks of the request and before the sign request is created. The key
+    // is the client id as it is stored: one count per client, whatever the spelling in the request.
+    const clientId = String(clientDetails['client-id'] ?? req.query.client_id)
+    const limit = authStartLimit.take(callerAddress(req), clientId)
+    if (!limit.allowed) {
+      console.log('auth: start limit reached, per ' + limit.limit, clientId)
+      res.setHeader('Retry-After', String(Math.max(1, Math.ceil(limit.retryAfterMs / 1000))))
+      return returnError(req, res, 'too_many_requests', 'Too many sign in requests. Please try again in a minute.', 429, {})
+    }
+
     try {
       return initiateXummSignin(req, res)
     } catch (e) {
