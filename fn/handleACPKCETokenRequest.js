@@ -70,7 +70,9 @@ module.exports = function handleACPKCETokenRequest (req, res) {
       } else if (error.msg === 'Code challenge does not exist.') {
         returnError(req, res, 'invalid_request', error.message, 400, {})
       } else {
-        throw error
+        // Any other error (datastore, ...): logged, and answered without its text
+        console.log('handleACPKCETokenRequest error', error.message)
+        if (!res.headersSent) returnError(req, res, 'server_error', 'Unexpected error', 500, {})
       }
     })
 }

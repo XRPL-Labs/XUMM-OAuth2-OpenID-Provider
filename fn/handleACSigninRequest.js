@@ -60,7 +60,8 @@ module.exports = function handleACSigninRequest (req, res) {
         .replace(/\//g, '_')
         .replace(/=/g, '')
 
-      const exp = Date.now() + (CODE_LIFE_SPAN * 1000);
+      // A Xaman sign-in can give a code a few times in a short time: all end when the first ends
+      const exp = (req.xummSigninUsedAt || Date.now()) + (CODE_LIFE_SPAN * 1000);
 
       const key = datastore.key(['authorization_code', authorizationCode])
       const data = {

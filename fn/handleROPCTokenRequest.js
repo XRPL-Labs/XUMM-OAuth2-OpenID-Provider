@@ -44,7 +44,9 @@ module.exports = function handleROPCTokenRequest (req, res) {
       if (error.message === 'Invalid client credentials.' || error.message === 'Invalid user credentials.') {
         returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
-        throw error;
+        // Any other error (datastore, ...): logged, and answered without its text
+        console.log('handleROPCTokenRequest error', error.message)
+        if (!res.headersSent) returnError(req, res, 'server_error', 'Unexpected error', 500, {})
       }
     })
 }

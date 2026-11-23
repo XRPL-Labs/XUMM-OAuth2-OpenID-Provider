@@ -64,7 +64,9 @@ module.exports = function handleACTokenRequest (req, res) {
       if (error.message === 'Invalid client credentials.' || error.message === 'Invalid authorization code.' || error.message === 'Client ID does not match the record.' || error.message === 'Redirect URL does not match the record.' || error.message === 'Authorization code expired.') {
         returnError(req, res, 'access_denied', error.message, 400, {})
       } else {
-        throw error
+        // Any other error (datastore, ...): logged, and answered without its text
+        console.log('handleACTokenRequest error', error.message)
+        if (!res.headersSent) returnError(req, res, 'server_error', 'Unexpected error', 500, {})
       }
     })
 }
