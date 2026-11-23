@@ -287,7 +287,7 @@ const suite = async () => {
   {
     newWindow()
     const t0 = clock.offset
-    for (let i = 0; i < 20; i++) await started('192.0.2.10')
+    for (let i = 0; i < PER_ADDRESS - 10; i++) await started('192.0.2.10')
     clock.offset = t0 + 30 * SECOND
     for (let i = 0; i < 10; i++) await started('192.0.2.10')
     const first = await limited('192.0.2.10')
@@ -297,8 +297,8 @@ const suite = async () => {
     clock.offset = t0 + 59 * SECOND
     for (let i = 0; i < 50; i++) await limited('192.0.2.10')
 
-    clock.offset = t0 + 61 * SECOND // the 20 of t0 left the window, the 10 of t0 + 30 s still count
-    for (let i = 0; i < 20; i++) await started('192.0.2.10')
+    clock.offset = t0 + 61 * SECOND // the starts of t0 left the window, the 10 of t0 + 30 s still count
+    for (let i = 0; i < PER_ADDRESS - 10; i++) await started('192.0.2.10')
     await limited('192.0.2.10')
 
     clock.offset = t0 + 89 * SECOND
