@@ -6,6 +6,7 @@ const {datastore} = require('../datastore')
 const crypto = require("crypto")
 const oauthErrorRedirect = require('./oauthErrorRedirect')
 const renderPkceRedirect = require('./renderPkceRedirect')
+const signinInstruction = require('./signinInstruction')
 
 const genHash = function genHash (client, token) {
   const _token = token || crypto.randomBytes(12).toString('hex')
@@ -138,7 +139,7 @@ module.exports = {
           }
         },
         custom_meta: {
-          instruction: 'Sign in to ' + req.query.redirect_uri.replace(/^[a-z0-9]+:\/\//, '').split('/')[0]
+          instruction: signinInstruction(req.query.redirect_uri)
         },
         txjson: {
           TransactionType: 'SignIn'
@@ -194,7 +195,8 @@ module.exports = {
               // `__t` is the flow's own token (stored at the start), `__used_at` the time of the first use (stored at
               // that use), the rest is the query of the /auth request
               const {__t: flowToken, __used_at: firstUsedAt, ...challengeData} = JSON.parse(challengeRow.params)
-              console.log({challengeData})
+              // The log line has the ids of the flow. The values of the /auth request are not logged.
+              console.log('Sign in return', clientId, payloadId)
 
               // The request must be the return of the flow this sign-in was started in. A row stored before the flow
               // token was kept has none: it only gets the checks below (this exception can go one day after release).

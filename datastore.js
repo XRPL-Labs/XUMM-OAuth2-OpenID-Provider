@@ -256,7 +256,8 @@ class DatastoreTransaction {
     const c = await this.m_connection
 
     if (key?.authorization_code) {
-      console.log('Transaction GET', key?.authorization_code)
+      // The code is not logged
+      console.log('Transaction GET')
       const data = await c.execute(`
         SELECT * FROM grants
         WHERE authorization_code = ?
@@ -276,7 +277,7 @@ class DatastoreTransaction {
     const c = await this.m_connection
 
     if (key?.authorization_code) {
-      console.log('Transaction DELETE', key?.authorization_code)
+      console.log('Transaction DELETE')
       const data = await c.execute(`
         UPDATE grants SET fetched = 1 WHERE authorization_code = ?
       `, [key?.authorization_code])

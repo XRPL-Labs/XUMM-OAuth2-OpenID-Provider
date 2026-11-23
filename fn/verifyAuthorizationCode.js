@@ -58,7 +58,7 @@ module.exports = function verifyAuthorizationCode (authorizationCode, clientId, 
       return entry
     })
     .catch(error => {
-      console.log({error})
+      console.log('verifyAuthorizationCode error', error?.message)
       transaction.rollback()
       throw error
     })
